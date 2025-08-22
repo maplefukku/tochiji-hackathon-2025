@@ -1,0 +1,1636 @@
+# Shibuya Live Canvas - 超詳細要件定義書 v4.0
+# ============================================
+# 作成日: 2025-08-22
+# プロジェクトコード: SLC-2025
+# ドキュメントステータス: 最終版
+
+# ====================
+# 1. プロジェクト概要
+# ====================
+project_overview:
+  project_name: "Shibuya Live Canvas"
+  project_code: "SLC-2025"
+  version: "4.0.0"
+  status: "要件定義完了"
+  
+  vision:
+    primary: "渋谷を世界一ダイナミックな「生きたキャンバス」に変える"
+    description: |
+      あらゆる言語・国籍・世代の人々が「今起きていること」を共有し、
+      街の未来を共創する次世代都市プラットフォーム
+  
+  mission:
+    primary: "位置情報ベースの「リアルタイム体験と感情」を集約・可視化"
+    goals:
+      - "人々の日常に発見と共感を生み出す"
+      - "市民と行政の「見えない壁」を溶かす"
+      - "リアルタイム参加型エンターテインメントの創出"
+  
+  core_concept:
+    entertainment_first: "エンタメファーストで社会参加が自然に起きる"
+    realtime_focus: "過去のレビューではなく「今起きていること」"
+    social_impact: "ソーシャルインパクトとビジネスの両立"
+    
+  target_users:
+    primary:
+      - segment: "若者層（18-25歳）"
+        percentage: 40
+      - segment: "観光客・外国人"
+        percentage: 30
+      - segment: "地元住民・商店主"
+        percentage: 20
+      - segment: "行政・自治体職員"
+        percentage: 10
+
+# ====================
+# 2. ビジネス要件
+# ====================
+business_requirements:
+  strategic_goals:
+    year_1:
+      - goal: "渋谷区での実証実験成功"
+        kpi: "MAU 150,000人達成"
+      - goal: "収益モデルの確立"
+        kpi: "月次収益 1,000万円"
+    year_3:
+      - goal: "全国主要都市展開"
+        kpi: "10都市導入、MAU 100万人"
+    year_5:
+      - goal: "グローバル展開"
+        kpi: "100都市、MAU 1,000万人"
+  
+  revenue_model:
+    phase_1:
+      premium_features:
+        price: "月額500円"
+        features:
+          - "広告非表示"
+          - "高度な分析機能"
+          - "無制限投稿"
+      business_analytics:
+        price: "月額50,000円〜"
+        target: "店舗・企業"
+    phase_2:
+      government_dashboard:
+        price: "年額1,000万円〜"
+        target: "自治体・行政"
+      api_access:
+        price: "従量課金制"
+        target: "開発者・研究機関"
+  
+  success_metrics:
+    user_engagement:
+      dau_mau_ratio:
+        mvp: 0.15
+        phase_1: 0.25
+        phase_2: 0.35
+      retention_30day:
+        target: 0.60
+        minimum: 0.45
+      app_rating:
+        target: 4.8
+        minimum: 4.5
+    business_metrics:
+      revenue_growth:
+        monthly_rate: 0.20
+      customer_acquisition_cost:
+        target: "500円/ユーザー"
+      lifetime_value:
+        target: "5,000円/ユーザー"
+
+# ====================
+# 3. 機能要件
+# ====================
+functional_requirements:
+  
+  # コア機能
+  core_features:
+    
+    realtime_map:
+      id: "FR-001"
+      priority: "必須"
+      description: "リアルタイム地図ベースSNS機能"
+      specifications:
+        map_provider: "Mapbox GL JS v3.0"
+        update_interval: "1秒"
+        zoom_levels:
+          min: 10
+          max: 20
+        layers:
+          - type: "posts"
+            refresh_rate: "real-time"
+          - type: "events"
+            refresh_rate: "5 minutes"
+          - type: "quests"
+            refresh_rate: "on-demand"
+      interactions:
+        - action: "tap_post"
+          result: "詳細表示"
+        - action: "long_press"
+          result: "新規投稿"
+        - action: "pinch_zoom"
+          result: "ズーム調整"
+    
+    post_management:
+      id: "FR-002"
+      priority: "必須"
+      description: "投稿作成・管理機能"
+      specifications:
+        post_types:
+          - type: "text"
+            max_length: 280
+          - type: "photo"
+            max_size: "10MB"
+            formats: ["jpg", "png", "webp"]
+          - type: "video"
+            max_size: "100MB"
+            max_duration: "60 seconds"
+            formats: ["mp4", "mov"]
+        location_tagging:
+          accuracy: "10 meters"
+          manual_adjustment: true
+        expiration:
+          default: "24 hours"
+          max: "7 days"
+          fade_algorithm:
+            - time: "0-1 hour"
+              opacity: 1.0
+            - time: "1-6 hours"
+              opacity: 0.8
+            - time: "6-12 hours"
+              opacity: 0.6
+            - time: "12-24 hours"
+              opacity: 0.3
+    
+    multi_language:
+      id: "FR-003"
+      priority: "必須"
+      description: "多言語対応機能"
+      specifications:
+        supported_languages:
+          - code: "ja"
+            name: "日本語"
+            default: true
+          - code: "en"
+            name: "English"
+          - code: "zh-CN"
+            name: "简体中文"
+          - code: "ko"
+            name: "한국어"
+        translation_api:
+          provider: "DeepL API Pro"
+          cache_duration: "30 days"
+          character_limit: "5,000,000/month"
+        ui_localization:
+          method: "i18next"
+          fallback: "en"
+    
+    quest_system:
+      id: "FR-004"
+      priority: "高"
+      description: "クエスト・ゲーミフィケーション機能"
+      specifications:
+        quest_types:
+          - type: "location_visit"
+            points: "10-50"
+          - type: "photo_upload"
+            points: "20-100"
+          - type: "survey_response"
+            points: "50-200"
+          - type: "event_participation"
+            points: "100-500"
+        rewards:
+          - type: "badges"
+            total: 50
+          - type: "titles"
+            total: 20
+          - type: "vouchers"
+            partners: ["local_shops", "restaurants"]
+        leaderboard:
+          refresh: "hourly"
+          categories: ["daily", "weekly", "monthly", "all-time"]
+    
+    notification_system:
+      id: "FR-005"
+      priority: "必須"
+      description: "通知・アラート機能"
+      specifications:
+        notification_types:
+          - type: "location_based"
+            trigger: "entering_area"
+            radius: "100-500m"
+          - type: "event_reminder"
+            timing: ["1hour", "30min", "start"]
+          - type: "social"
+            events: ["like", "comment", "follow"]
+          - type: "quest"
+            events: ["new", "deadline", "complete"]
+        delivery_channels:
+          - channel: "push"
+            platform: ["ios", "android"]
+          - channel: "in_app"
+            persistence: "7 days"
+          - channel: "email"
+            opt_in: true
+        preferences:
+          granularity: "per_type"
+          quiet_hours: true
+          frequency_cap: "20/day"
+
+  # 高度な機能（フェーズ2）
+  advanced_features:
+    
+    sentiment_analysis:
+      id: "FR-101"
+      priority: "中"
+      phase: 2
+      description: "感情分析・可視化機能"
+      specifications:
+        analysis_engine:
+          provider: "AWS Comprehend"
+          languages: ["ja", "en", "zh", "ko"]
+        visualization:
+          - type: "heatmap"
+            emotions: ["happy", "excited", "neutral", "frustrated", "sad"]
+          - type: "timeline"
+            granularity: ["hour", "day", "week"]
+        accuracy_target: 0.85
+    
+    government_dashboard:
+      id: "FR-102"
+      priority: "高"
+      phase: 2
+      description: "行政向けダッシュボード"
+      specifications:
+        data_views:
+          - view: "realtime_activity"
+            refresh: "1 minute"
+          - view: "demographic_analysis"
+            refresh: "hourly"
+          - view: "issue_tracking"
+            categories: ["infrastructure", "safety", "events"]
+        export_formats: ["csv", "json", "pdf"]
+        access_control:
+          method: "RBAC"
+          levels: ["viewer", "analyst", "admin"]
+    
+    ai_prediction:
+      id: "FR-103"
+      priority: "低"
+      phase: 3
+      description: "AI予測・推薦機能"
+      specifications:
+        prediction_models:
+          - model: "crowd_density"
+            accuracy: 0.80
+            horizon: "1-6 hours"
+          - model: "event_success"
+            accuracy: 0.75
+            factors: ["weather", "time", "history"]
+        recommendation_engine:
+          algorithm: "collaborative_filtering"
+          personalization_level: "high"
+
+# ====================
+# 4. 非機能要件
+# ====================
+non_functional_requirements:
+  
+  performance:
+    id: "NFR-001"
+    category: "パフォーマンス"
+    specifications:
+      response_time:
+        api_calls:
+          p50: "200ms"
+          p95: "500ms"
+          p99: "1000ms"
+        page_load:
+          initial: "< 3 seconds"
+          subsequent: "< 1 second"
+      throughput:
+        concurrent_users: 50000
+        requests_per_second: 10000
+      data_processing:
+        batch_processing: "< 5 minutes"
+        real_time_processing: "< 100ms"
+  
+  scalability:
+    id: "NFR-002"
+    category: "スケーラビリティ"
+    specifications:
+      horizontal_scaling:
+        auto_scale: true
+        min_instances: 2
+        max_instances: 100
+      database_scaling:
+        sharding: true
+        read_replicas: 5
+      cdn_coverage:
+        regions: ["asia-pacific", "north-america", "europe"]
+  
+  reliability:
+    id: "NFR-003"
+    category: "信頼性"
+    specifications:
+      availability:
+        sla: "99.9%"
+        maintenance_window: "月曜 3:00-5:00 JST"
+      fault_tolerance:
+        strategy: "active-passive"
+        failover_time: "< 30 seconds"
+      backup:
+        frequency: "hourly"
+        retention: "30 days"
+        recovery_time_objective: "1 hour"
+        recovery_point_objective: "1 hour"
+  
+  security:
+    id: "NFR-004"
+    category: "セキュリティ"
+    specifications:
+      authentication:
+        methods: ["oauth2", "biometric", "passkey"]
+        session_timeout: "7 days"
+        mfa_required: false
+      authorization:
+        model: "RBAC"
+        granularity: "resource-level"
+      encryption:
+        at_rest: "AES-256"
+        in_transit: "TLS 1.3"
+      compliance:
+        standards: ["GDPR", "個人情報保護法", "CCPA"]
+      vulnerability_management:
+        scanning: "weekly"
+        penetration_testing: "quarterly"
+  
+  usability:
+    id: "NFR-005"
+    category: "ユーザビリティ"
+    specifications:
+      accessibility:
+        standard: "WCAG 2.1 AA"
+        screen_reader: "full support"
+        keyboard_navigation: true
+      user_experience:
+        task_completion_rate: "> 90%"
+        error_rate: "< 5%"
+        satisfaction_score: "> 4.5/5"
+      learning_curve:
+        onboarding_completion: "> 80%"
+        time_to_first_action: "< 2 minutes"
+  
+  maintainability:
+    id: "NFR-006"
+    category: "保守性"
+    specifications:
+      code_quality:
+        test_coverage: "> 80%"
+        code_review: "mandatory"
+        linting: "automated"
+      documentation:
+        api_docs: "OpenAPI 3.0"
+        code_comments: "> 30%"
+        user_manual: "multi-language"
+      monitoring:
+        apm: "DataDog"
+        logging: "ELK Stack"
+        alerting: "PagerDuty"
+
+# ====================
+# 5. システムアーキテクチャ
+# ====================
+system_architecture:
+  
+  overview:
+    type: "Microservices"
+    deployment: "Cloud Native"
+    cloud_provider: "AWS"
+    regions: ["ap-northeast-1", "us-west-2"]
+  
+  frontend:
+    mobile:
+      framework: "React Native"
+      version: "0.72.x"
+      state_management: "Redux Toolkit"
+      ui_library: "React Native Elements"
+    web:
+      framework: "Next.js"
+      version: "14.x"
+      styling: "Tailwind CSS"
+      state_management: "Zustand"
+  
+  backend:
+    api_gateway:
+      service: "AWS API Gateway"
+      protocol: "REST/GraphQL"
+      rate_limiting: true
+    
+    microservices:
+      user_service:
+        language: "Node.js"
+        framework: "NestJS"
+        database: "PostgreSQL"
+      
+      post_service:
+        language: "Go"
+        framework: "Gin"
+        database: "MongoDB"
+      
+      quest_service:
+        language: "Python"
+        framework: "FastAPI"
+        database: "PostgreSQL"
+      
+      notification_service:
+        language: "Node.js"
+        framework: "Express"
+        queue: "AWS SQS"
+      
+      analytics_service:
+        language: "Python"
+        framework: "Django"
+        database: "ClickHouse"
+  
+  databases:
+    primary:
+      type: "PostgreSQL"
+      version: "15.x"
+      clustering: "Multi-AZ RDS"
+    
+    nosql:
+      type: "MongoDB"
+      version: "6.x"
+      purpose: "posts, media"
+    
+    cache:
+      type: "Redis"
+      version: "7.x"
+      purpose: "session, cache"
+    
+    search:
+      type: "Elasticsearch"
+      version: "8.x"
+      purpose: "full-text search"
+  
+  infrastructure:
+    container:
+      orchestration: "Kubernetes (EKS)"
+      registry: "Amazon ECR"
+    
+    ci_cd:
+      pipeline: "GitHub Actions"
+      deployment: "ArgoCD"
+      environment: ["dev", "staging", "production"]
+    
+    monitoring:
+      apm: "DataDog"
+      logging: "CloudWatch/ELK"
+      tracing: "Jaeger"
+
+# ====================
+# 6. データモデル
+# ====================
+data_model:
+  
+  entities:
+    
+    user:
+      table: "users"
+      attributes:
+        - name: "id"
+          type: "uuid"
+          constraints: ["primary_key"]
+        - name: "username"
+          type: "varchar(50)"
+          constraints: ["unique", "not_null"]
+        - name: "email"
+          type: "varchar(255)"
+          constraints: ["unique", "not_null"]
+        - name: "profile"
+          type: "jsonb"
+          structure:
+            display_name: "string"
+            avatar_url: "string"
+            bio: "text"
+            language: "string"
+        - name: "location_privacy"
+          type: "enum"
+          values: ["public", "friends", "private"]
+        - name: "created_at"
+          type: "timestamp"
+        - name: "updated_at"
+          type: "timestamp"
+      indexes:
+        - columns: ["email"]
+        - columns: ["username"]
+        - columns: ["created_at"]
+    
+    post:
+      table: "posts"
+      attributes:
+        - name: "id"
+          type: "uuid"
+          constraints: ["primary_key"]
+        - name: "user_id"
+          type: "uuid"
+          constraints: ["foreign_key:users.id"]
+        - name: "content"
+          type: "text"
+          constraints: ["not_null"]
+        - name: "media"
+          type: "jsonb[]"
+          structure:
+            type: "enum:photo,video"
+            url: "string"
+            thumbnail: "string"
+        - name: "location"
+          type: "geography(POINT,4326)"
+          constraints: ["not_null"]
+        - name: "location_name"
+          type: "varchar(255)"
+        - name: "language"
+          type: "varchar(10)"
+        - name: "translations"
+          type: "jsonb"
+        - name: "expires_at"
+          type: "timestamp"
+        - name: "visibility"
+          type: "enum"
+          values: ["public", "followers", "private"]
+        - name: "engagement"
+          type: "jsonb"
+          structure:
+            likes: "integer"
+            comments: "integer"
+            shares: "integer"
+        - name: "created_at"
+          type: "timestamp"
+      indexes:
+        - columns: ["user_id"]
+        - columns: ["location"]
+          type: "gist"
+        - columns: ["created_at"]
+        - columns: ["expires_at"]
+    
+    quest:
+      table: "quests"
+      attributes:
+        - name: "id"
+          type: "uuid"
+          constraints: ["primary_key"]
+        - name: "title"
+          type: "jsonb"
+          structure:
+            ja: "string"
+            en: "string"
+            zh: "string"
+            ko: "string"
+        - name: "description"
+          type: "jsonb"
+        - name: "type"
+          type: "enum"
+          values: ["location", "photo", "survey", "event"]
+        - name: "requirements"
+          type: "jsonb"
+        - name: "rewards"
+          type: "jsonb"
+          structure:
+            points: "integer"
+            badges: "string[]"
+            vouchers: "jsonb[]"
+        - name: "location"
+          type: "geography(POLYGON,4326)"
+        - name: "start_time"
+          type: "timestamp"
+        - name: "end_time"
+          type: "timestamp"
+        - name: "max_participants"
+          type: "integer"
+        - name: "current_participants"
+          type: "integer"
+      indexes:
+        - columns: ["type"]
+        - columns: ["location"]
+          type: "gist"
+        - columns: ["start_time", "end_time"]
+    
+    event:
+      table: "events"
+      attributes:
+        - name: "id"
+          type: "uuid"
+          constraints: ["primary_key"]
+        - name: "name"
+          type: "jsonb"
+        - name: "description"
+          type: "jsonb"
+        - name: "category"
+          type: "varchar(50)"
+        - name: "location"
+          type: "geography(POINT,4326)"
+        - name: "venue"
+          type: "varchar(255)"
+        - name: "start_time"
+          type: "timestamp"
+        - name: "end_time"
+          type: "timestamp"
+        - name: "organizer"
+          type: "jsonb"
+        - name: "capacity"
+          type: "integer"
+        - name: "registration_url"
+          type: "varchar(500)"
+        - name: "tags"
+          type: "varchar[]"
+        - name: "source"
+          type: "enum"
+          values: ["manual", "api", "scraping"]
+      indexes:
+        - columns: ["category"]
+        - columns: ["location"]
+          type: "gist"
+        - columns: ["start_time", "end_time"]
+        - columns: ["tags"]
+          type: "gin"
+
+# ====================
+# 7. API仕様
+# ====================
+api_specifications:
+  
+  base_url: "https://api.shibuyalivecanvas.com/v1"
+  
+  authentication:
+    type: "Bearer Token"
+    header: "Authorization"
+    token_type: "JWT"
+    expiration: "7 days"
+  
+  endpoints:
+    
+    # 認証関連
+    auth:
+      - method: "POST"
+        path: "/auth/register"
+        description: "ユーザー登録"
+        request_body:
+          email: "string"
+          password: "string"
+          username: "string"
+        response:
+          user: "User"
+          token: "string"
+      
+      - method: "POST"
+        path: "/auth/login"
+        description: "ログイン"
+        request_body:
+          email: "string"
+          password: "string"
+        response:
+          user: "User"
+          token: "string"
+    
+    # 投稿関連
+    posts:
+      - method: "GET"
+        path: "/posts/nearby"
+        description: "近隣の投稿取得"
+        parameters:
+          lat: "float"
+          lng: "float"
+          radius: "integer (meters)"
+          limit: "integer"
+          offset: "integer"
+        response:
+          posts: "Post[]"
+          total: "integer"
+      
+      - method: "POST"
+        path: "/posts"
+        description: "投稿作成"
+        request_body:
+          content: "string"
+          media: "Media[]"
+          location:
+            lat: "float"
+            lng: "float"
+          expires_in: "integer (hours)"
+        response:
+          post: "Post"
+      
+      - method: "PUT"
+        path: "/posts/{id}/translate"
+        description: "投稿翻訳"
+        parameters:
+          target_language: "string"
+        response:
+          translation: "string"
+          cached: "boolean"
+    
+    # クエスト関連
+    quests:
+      - method: "GET"
+        path: "/quests/available"
+        description: "利用可能なクエスト取得"
+        parameters:
+          lat: "float"
+          lng: "float"
+          type: "string"
+        response:
+          quests: "Quest[]"
+      
+      - method: "POST"
+        path: "/quests/{id}/participate"
+        description: "クエスト参加"
+        response:
+          participation: "QuestParticipation"
+      
+      - method: "POST"
+        path: "/quests/{id}/complete"
+        description: "クエスト完了"
+        request_body:
+          evidence: "jsonb"
+        response:
+          rewards: "Reward[]"
+          points_earned: "integer"
+    
+    # 分析関連
+    analytics:
+      - method: "GET"
+        path: "/analytics/dashboard"
+        description: "ダッシュボードデータ取得"
+        parameters:
+          period: "string"
+          metrics: "string[]"
+        response:
+          data: "AnalyticsData"
+      
+      - method: "GET"
+        path: "/analytics/sentiment"
+        description: "感情分析データ取得"
+        parameters:
+          area: "GeoJSON"
+          timeframe: "string"
+        response:
+          sentiment_map: "SentimentData"
+  
+  rate_limiting:
+    default:
+      requests: 1000
+      window: "1 hour"
+    authenticated:
+      requests: 5000
+      window: "1 hour"
+    premium:
+      requests: 50000
+      window: "1 hour"
+  
+  error_codes:
+    - code: 400
+      message: "Bad Request"
+    - code: 401
+      message: "Unauthorized"
+    - code: 403
+      message: "Forbidden"
+    - code: 404
+      message: "Not Found"
+    - code: 429
+      message: "Too Many Requests"
+    - code: 500
+      message: "Internal Server Error"
+
+# ====================
+# 8. UI/UX設計
+# ====================
+ui_ux_design:
+  
+  design_system:
+    name: "SLC Design System"
+    version: "1.0.0"
+    
+    principles:
+      - principle: "エンタメファースト"
+        description: "技術的複雑さを隠し、楽しさを前面に"
+      - principle: "ユニバーサルデザイン"
+        description: "全世代・全文化にアクセシブル"
+      - principle: "リアルタイム性"
+        description: "「今」を感じられるインターフェース"
+    
+    color_palette:
+      primary:
+        main: "#4f46e5"
+        light: "#6366f1"
+        dark: "#3730a3"
+      accent:
+        main: "#ec4899"
+        light: "#f472b6"
+        dark: "#be185d"
+      semantic:
+        success: "#10b981"
+        warning: "#f59e0b"
+        error: "#ef4444"
+        info: "#3b82f6"
+      neutral:
+        50: "#f9fafb"
+        100: "#f3f4f6"
+        200: "#e5e7eb"
+        300: "#d1d5db"
+        400: "#9ca3af"
+        500: "#6b7280"
+        600: "#4b5563"
+        700: "#374151"
+        800: "#1f2937"
+        900: "#111827"
+    
+    typography:
+      font_family:
+        primary: "'SF Pro Display', -apple-system, 'Hiragino Sans'"
+        secondary: "'Inter', 'Noto Sans JP', sans-serif"
+      
+      font_sizes:
+        xs: "12px"
+        sm: "14px"
+        base: "16px"
+        lg: "18px"
+        xl: "20px"
+        "2xl": "24px"
+        "3xl": "30px"
+        "4xl": "36px"
+      
+      font_weights:
+        regular: 400
+        medium: 500
+        semibold: 600
+        bold: 700
+        extrabold: 800
+    
+    spacing:
+      unit: "4px"
+      scale:
+        xs: "4px"
+        sm: "8px"
+        md: "16px"
+        lg: "24px"
+        xl: "32px"
+        "2xl": "48px"
+        "3xl": "64px"
+    
+    breakpoints:
+      mobile: "0-767px"
+      tablet: "768-1023px"
+      desktop: "1024-1439px"
+      wide: "1440px+"
+  
+  screen_layouts:
+    
+    main_map:
+      layout_type: "map-centric"
+      components:
+        map_view:
+          coverage: "60%"
+          position: "center"
+          controls:
+            - zoom: "bottom-right"
+            - location: "bottom-right"
+            - layers: "top-right"
+        
+        timeline_slider:
+          position: "bottom"
+          height: "80px"
+          range: "-24h to +24h"
+        
+        floating_actions:
+          position: "bottom-center"
+          buttons:
+            - action: "create_post"
+              icon: "plus"
+              size: "56px"
+            - action: "filter"
+              icon: "filter"
+              size: "48px"
+            - action: "quests"
+              icon: "star"
+              size: "48px"
+        
+        notification_bar:
+          position: "top"
+          height: "48px"
+          auto_hide: true
+    
+    post_detail:
+      layout_type: "card-modal"
+      components:
+        header:
+          user_info: true
+          timestamp: true
+          location_badge: true
+        
+        content:
+          media_carousel: true
+          text_content: true
+          translation_button: true
+        
+        engagement:
+          like_button: true
+          comment_section: true
+          share_button: true
+        
+        related:
+          nearby_posts: true
+          similar_posts: true
+    
+    user_profile:
+      layout_type: "scrollable"
+      components:
+        profile_header:
+          avatar: true
+          stats: true
+          edit_button: true
+        
+        content_tabs:
+          - tab: "posts"
+          - tab: "quests"
+          - tab: "badges"
+          - tab: "settings"
+  
+  animations:
+    
+    transitions:
+      page_transition:
+        type: "slide"
+        duration: "300ms"
+        easing: "ease-in-out"
+      
+      modal_open:
+        type: "fade-scale"
+        duration: "200ms"
+        easing: "ease-out"
+    
+    micro_interactions:
+      button_press:
+        type: "scale"
+        scale: 0.95
+        duration: "100ms"
+      
+      like_animation:
+        type: "bounce"
+        duration: "400ms"
+      
+      post_appear:
+        type: "fade-in"
+        duration: "300ms"
+        stagger: "50ms"
+
+# ====================
+# 9. セキュリティ設計
+# ====================
+security_design:
+  
+  authentication:
+    methods:
+      - type: "password"
+        requirements:
+          min_length: 8
+          complexity: "upper+lower+number"
+      - type: "oauth2"
+        providers: ["google", "apple", "line"]
+      - type: "biometric"
+        platforms: ["ios", "android"]
+    
+    session_management:
+      token_type: "JWT"
+      expiration: "7 days"
+      refresh_token: "30 days"
+      storage: "secure_keychain"
+  
+  authorization:
+    model: "RBAC"
+    roles:
+      - role: "user"
+        permissions: ["read", "create_own", "edit_own"]
+      - role: "moderator"
+        permissions: ["read", "edit_any", "delete_inappropriate"]
+      - role: "admin"
+        permissions: ["all"]
+      - role: "government"
+        permissions: ["read", "analytics", "export"]
+  
+  data_protection:
+    encryption:
+      at_rest:
+        algorithm: "AES-256-GCM"
+        key_management: "AWS KMS"
+      in_transit:
+        protocol: "TLS 1.3"
+        cipher_suites: ["TLS_AES_256_GCM_SHA384"]
+    
+    privacy:
+      location_data:
+        precision_reduction: "optional"
+        anonymization: "after 30 days"
+      
+      personal_data:
+        retention: "2 years"
+        deletion: "soft delete + hard delete after 30 days"
+      
+      gdpr_compliance:
+        data_portability: true
+        right_to_be_forgotten: true
+        consent_management: true
+  
+  threat_mitigation:
+    
+    content_moderation:
+      automated:
+        provider: "AWS Rekognition"
+        confidence_threshold: 0.8
+      manual:
+        report_threshold: 3
+        review_time: "< 24 hours"
+    
+    rate_limiting:
+      by_ip:
+        requests: 100
+        window: "1 minute"
+      by_user:
+        requests: 1000
+        window: "1 hour"
+    
+    ddos_protection:
+      provider: "CloudFlare"
+      mode: "auto"
+    
+    vulnerability_management:
+      dependency_scanning: "daily"
+      static_analysis: "on commit"
+      penetration_testing: "quarterly"
+
+# ====================
+# 10. インフラ設計
+# ====================
+infrastructure_design:
+  
+  cloud_architecture:
+    provider: "AWS"
+    regions:
+      primary: "ap-northeast-1"
+      disaster_recovery: "us-west-2"
+    
+    compute:
+      container_service: "EKS"
+      node_groups:
+        - name: "api"
+          instance_type: "t3.large"
+          min: 2
+          max: 20
+        - name: "worker"
+          instance_type: "t3.medium"
+          min: 1
+          max: 10
+    
+    storage:
+      object_storage:
+        service: "S3"
+        buckets:
+          - name: "media"
+            lifecycle: "90 days to Glacier"
+          - name: "backups"
+            versioning: true
+      
+      block_storage:
+        service: "EBS"
+        type: "gp3"
+        iops: 3000
+    
+    networking:
+      vpc:
+        cidr: "10.0.0.0/16"
+        subnets:
+          public: ["10.0.1.0/24", "10.0.2.0/24"]
+          private: ["10.0.10.0/24", "10.0.11.0/24"]
+      
+      load_balancer:
+        type: "ALB"
+        ssl_termination: true
+      
+      cdn:
+        provider: "CloudFront"
+        cache_behaviors:
+          static: "1 year"
+          api: "no-cache"
+  
+  database_infrastructure:
+    
+    rds:
+      engine: "PostgreSQL"
+      version: "15.3"
+      instance_class: "db.r6g.xlarge"
+      multi_az: true
+      read_replicas: 2
+      backup:
+        retention: "30 days"
+        window: "03:00-04:00 JST"
+    
+    documentdb:
+      engine: "MongoDB Compatible"
+      version: "5.0"
+      instance_class: "db.r6g.large"
+      cluster_size: 3
+    
+    elasticache:
+      engine: "Redis"
+      version: "7.0"
+      node_type: "cache.r6g.large"
+      cluster_mode: true
+      replicas: 2
+  
+  monitoring_infrastructure:
+    
+    metrics:
+      service: "CloudWatch"
+      custom_metrics:
+        - "active_users"
+        - "post_creation_rate"
+        - "quest_completion_rate"
+    
+    logging:
+      aggregation: "CloudWatch Logs"
+      analysis: "Elasticsearch"
+      retention: "30 days"
+    
+    tracing:
+      service: "X-Ray"
+      sampling_rate: 0.1
+    
+    alerting:
+      channels:
+        - type: "email"
+        - type: "slack"
+        - type: "pagerduty"
+      
+      sla_alerts:
+        - metric: "availability"
+          threshold: "< 99.9%"
+        - metric: "response_time_p95"
+          threshold: "> 1000ms"
+
+# ====================
+# 11. 開発計画
+# ====================
+development_plan:
+  
+  phases:
+    
+    phase_0_poc:
+      duration: "1 month"
+      start_date: "2025-09-01"
+      end_date: "2025-09-30"
+      deliverables:
+        - "技術検証完了"
+        - "プロトタイプ作成"
+        - "ユーザーインタビュー"
+      success_criteria:
+        - "基本機能動作確認"
+        - "10人のテストユーザー"
+    
+    phase_1_mvp:
+      duration: "3 months"
+      start_date: "2025-10-01"
+      end_date: "2025-12-31"
+      deliverables:
+        - "コア機能実装"
+        - "iOS/Androidアプリ"
+        - "基本的な管理画面"
+      success_criteria:
+        - "5,000 MAU"
+        - "100 posts/day"
+        - "App Store承認"
+    
+    phase_2_beta:
+      duration: "3 months"
+      start_date: "2026-01-01"
+      end_date: "2026-03-31"
+      deliverables:
+        - "多言語対応"
+        - "クエストシステム"
+        - "分析ダッシュボード"
+      success_criteria:
+        - "30,000 MAU"
+        - "1,500 posts/day"
+        - "渋谷区との連携開始"
+    
+    phase_3_launch:
+      duration: "6 months"
+      start_date: "2026-04-01"
+      end_date: "2026-09-30"
+      deliverables:
+        - "正式リリース"
+        - "マーケティングキャンペーン"
+        - "企業向け機能"
+      success_criteria:
+        - "150,000 MAU"
+        - "10,000 posts/day"
+        - "月次収益1000万円"
+  
+  team_structure:
+    
+    engineering:
+      frontend:
+        senior: 2
+        mid: 3
+        junior: 2
+      backend:
+        senior: 2
+        mid: 3
+        junior: 1
+      devops:
+        senior: 1
+        mid: 1
+      qa:
+        senior: 1
+        mid: 2
+    
+    product:
+      product_manager: 1
+      product_designer: 2
+      ux_researcher: 1
+    
+    business:
+      business_development: 2
+      marketing: 2
+      customer_success: 1
+  
+  technology_stack:
+    
+    frontend:
+      mobile:
+        - "React Native 0.72"
+        - "Redux Toolkit"
+        - "React Navigation"
+        - "React Native Maps"
+      web:
+        - "Next.js 14"
+        - "TypeScript 5"
+        - "Tailwind CSS"
+        - "Mapbox GL JS"
+    
+    backend:
+      languages:
+        - "Node.js 20"
+        - "Python 3.11"
+        - "Go 1.21"
+      frameworks:
+        - "NestJS"
+        - "FastAPI"
+        - "Gin"
+    
+    infrastructure:
+      - "AWS (EKS, RDS, S3, CloudFront)"
+      - "Docker/Kubernetes"
+      - "GitHub Actions"
+      - "Terraform"
+    
+    tools:
+      - "Jira (Project Management)"
+      - "Figma (Design)"
+      - "Slack (Communication)"
+      - "DataDog (Monitoring)"
+
+# ====================
+# 12. リスク管理
+# ====================
+risk_management:
+  
+  technical_risks:
+    - id: "TR-001"
+      risk: "スケーラビリティの問題"
+      probability: "中"
+      impact: "高"
+      mitigation:
+        - "早期の負荷テスト実施"
+        - "マイクロサービス化"
+        - "キャッシュ戦略の最適化"
+    
+    - id: "TR-002"
+      risk: "リアルタイム処理の遅延"
+      probability: "中"
+      impact: "中"
+      mitigation:
+        - "WebSocket実装の最適化"
+        - "エッジサーバーの活用"
+        - "優先度付きキューの実装"
+  
+  business_risks:
+    - id: "BR-001"
+      risk: "ユーザー獲得の遅れ"
+      probability: "高"
+      impact: "高"
+      mitigation:
+        - "インフルエンサーマーケティング"
+        - "学生アンバサダープログラム"
+        - "初期インセンティブの提供"
+    
+    - id: "BR-002"
+      risk: "収益化の困難"
+      probability: "中"
+      impact: "高"
+      mitigation:
+        - "複数の収益源の確保"
+        - "早期の企業パートナーシップ"
+        - "政府助成金の活用"
+  
+  legal_risks:
+    - id: "LR-001"
+      risk: "プライバシー規制違反"
+      probability: "低"
+      impact: "高"
+      mitigation:
+        - "法務レビューの徹底"
+        - "プライバシーバイデザイン"
+        - "定期的な監査"
+    
+    - id: "LR-002"
+      risk: "不適切コンテンツの流通"
+      probability: "中"
+      impact: "中"
+      mitigation:
+        - "AI自動モデレーション"
+        - "24時間監視体制"
+        - "コミュニティガイドラインの明確化"
+
+# ====================
+# 13. 成功指標（KPI）
+# ====================
+key_performance_indicators:
+  
+  user_metrics:
+    acquisition:
+      - metric: "Monthly Active Users"
+        mvp: 5000
+        phase_1: 30000
+        phase_2: 150000
+        phase_3: 1000000
+      
+      - metric: "Daily Active Users"
+        mvp: 750
+        phase_1: 7500
+        phase_2: 52500
+        phase_3: 350000
+    
+    engagement:
+      - metric: "Posts per User per Month"
+        target: 3.5
+        minimum: 2.0
+      
+      - metric: "Session Duration"
+        target: "8 minutes"
+        minimum: "5 minutes"
+      
+      - metric: "Quest Completion Rate"
+        target: 0.60
+        minimum: 0.40
+    
+    retention:
+      - metric: "Day 1 Retention"
+        target: 0.60
+        minimum: 0.45
+      
+      - metric: "Day 7 Retention"
+        target: 0.35
+        minimum: 0.25
+      
+      - metric: "Day 30 Retention"
+        target: 0.20
+        minimum: 0.15
+  
+  business_metrics:
+    revenue:
+      - metric: "Monthly Recurring Revenue"
+        phase_1: "100万円"
+        phase_2: "1000万円"
+        phase_3: "1億円"
+      
+      - metric: "Average Revenue Per User"
+        target: "100円"
+        minimum: "50円"
+    
+    cost:
+      - metric: "Customer Acquisition Cost"
+        target: "500円"
+        maximum: "1000円"
+      
+      - metric: "Infrastructure Cost per User"
+        target: "30円"
+        maximum: "50円"
+    
+    growth:
+      - metric: "Month-over-Month Growth"
+        target: 0.20
+        minimum: 0.10
+      
+      - metric: "Viral Coefficient"
+        target: 1.2
+        minimum: 1.0
+  
+  technical_metrics:
+    performance:
+      - metric: "API Response Time P95"
+        target: "500ms"
+        maximum: "1000ms"
+      
+      - metric: "App Crash Rate"
+        target: "< 0.1%"
+        maximum: "< 0.5%"
+    
+    reliability:
+      - metric: "System Uptime"
+        target: "99.9%"
+        minimum: "99.5%"
+      
+      - metric: "Error Rate"
+        target: "< 0.1%"
+        maximum: "< 0.5%"
+
+# ====================
+# 14. 移行・導入計画
+# ====================
+migration_plan:
+  
+  data_migration:
+    strategy: "新規構築"
+    external_data_sources:
+      - source: "Google Places API"
+        data_type: "店舗・施設情報"
+        update_frequency: "daily"
+      
+      - source: "イベント情報API"
+        data_type: "公式イベント"
+        update_frequency: "hourly"
+  
+  user_onboarding:
+    
+    phases:
+      alpha:
+        users: 100
+        method: "招待制"
+        duration: "2 weeks"
+      
+      beta:
+        users: 5000
+        method: "事前登録"
+        duration: "1 month"
+      
+      public:
+        users: "unlimited"
+        method: "App Store/Google Play"
+    
+    onboarding_flow:
+      steps:
+        1: "アプリダウンロード"
+        2: "アカウント作成（SNS連携可）"
+        3: "位置情報許可"
+        4: "言語・興味選択"
+        5: "チュートリアル（3画面）"
+        6: "初回クエスト提示"
+      
+      completion_target: "> 80%"
+  
+  rollout_strategy:
+    
+    geographic_expansion:
+      phase_1:
+        area: "渋谷区"
+        timeline: "Month 1-6"
+        target_users: 100000
+      
+      phase_2:
+        area: "東京23区"
+        timeline: "Month 7-12"
+        target_users: 500000
+      
+      phase_3:
+        area: "主要都市（大阪、名古屋、福岡）"
+        timeline: "Year 2"
+        target_users: 2000000
+      
+      phase_4:
+        area: "グローバル（NY、London、Singapore）"
+        timeline: "Year 3-5"
+        target_users: 10000000
+
+# ====================
+# 15. 運用・保守計画
+# ====================
+operations_maintenance:
+  
+  support_structure:
+    
+    levels:
+      l1_support:
+        scope: "基本的な問い合わせ"
+        response_time: "24 hours"
+        channels: ["in-app", "email"]
+      
+      l2_support:
+        scope: "技術的な問題"
+        response_time: "48 hours"
+        channels: ["email", "phone"]
+      
+      l3_support:
+        scope: "重大な問題・バグ"
+        response_time: "4 hours"
+        escalation: "engineering team"
+    
+    languages:
+      - "日本語"
+      - "English"
+      - "中文"
+      - "한국어"
+  
+  maintenance_schedule:
+    
+    regular:
+      frequency: "毎週月曜"
+      time: "03:00-05:00 JST"
+      type: "定期メンテナンス"
+      notification: "24時間前"
+    
+    emergency:
+      criteria: "重大なセキュリティ問題"
+      notification: "即時"
+      rollback_plan: true
+  
+  monitoring_operations:
+    
+    dashboards:
+      - name: "System Health"
+        metrics: ["uptime", "response_time", "error_rate"]
+        refresh: "1 minute"
+      
+      - name: "User Activity"
+        metrics: ["active_users", "posts", "quests"]
+        refresh: "5 minutes"
+      
+      - name: "Business Metrics"
+        metrics: ["revenue", "conversion", "retention"]
+        refresh: "hourly"
+    
+    alerts:
+      critical:
+        - condition: "service_down"
+          action: "page_oncall"
+        - condition: "data_breach"
+          action: "emergency_response"
+      
+      warning:
+        - condition: "high_error_rate"
+          threshold: "> 1%"
+          action: "slack_notification"
+        - condition: "slow_response"
+          threshold: "> 2 seconds"
+          action: "email_team"
+  
+  backup_recovery:
+    
+    backup_strategy:
+      databases:
+        frequency: "hourly"
+        retention: "30 days"
+        test_restore: "monthly"
+      
+      files:
+        frequency: "daily"
+        retention: "90 days"
+        location: "S3 cross-region"
+    
+    disaster_recovery:
+      rto: "4 hours"
+      rpo: "1 hour"
+      dr_site: "us-west-2"
+      test_frequency: "quarterly"
+  
+  continuous_improvement:
+    
+    performance_optimization:
+      review_frequency: "monthly"
+      metrics_analyzed:
+        - "slow_queries"
+        - "api_bottlenecks"
+        - "cache_hit_rate"
+    
+    security_updates:
+      patch_schedule: "weekly"
+      vulnerability_scanning: "daily"
+      penetration_testing: "quarterly"
+    
+    feature_updates:
+      release_cycle: "2 weeks"
+      deployment_strategy: "blue-green"
+      rollback_capability: true
+
+# ====================
+# END OF REQUIREMENTS DEFINITION
+# ====================

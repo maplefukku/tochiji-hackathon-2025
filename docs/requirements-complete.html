@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shibuya Live Canvas - 完全版要件定義書 Ver.2.0</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --primary: #667eea;
+  --accent: #ec4899;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --dark: #1e293b;
+  --light: #f8fafc;
+  --border: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-success: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'SF Pro Display', -apple-system, 'Hiragino Sans', sans-serif;
+  line-height: 1.8;
+  color: var(--text-primary);
+  background: linear-gradient(to bottom, #f8fafc 0%, #e0e7ff 100%);
+  min-height: 100vh;
+}
+
+.header-hero {
+  background: var(--gradient-main);
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: moveGrid 20s linear infinite;
+}
+
+@keyframes moveGrid {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+.header-hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  position: relative;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.header-hero .subtitle {
+  font-size: 1.5rem;
+  opacity: 0.95;
+  margin-bottom: 30px;
+}
+
+.version-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+}
+
+.container {
+  display: flex;
+  background: white;
+  min-height: 100vh;
+  box-shadow: 0 0 50px rgba(0,0,0,0.1);
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--dark);
+  padding: 30px 20px;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+  color: white;
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.nav-section {
+  margin-bottom: 25px;
+}
+
+.nav-section-title {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.nav-item {
+  color: #cbd5e1;
+  padding: 12px 15px;
+  display: block;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  transition: all 0.3s;
+  font-size: 0.95rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: var(--primary);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+  transform: translateX(3px);
+}
+
+.nav-item.active {
+  background: var(--primary);
+  color: white;
+}
+
+.nav-item.active::before {
+  transform: translateX(0);
+}
+
+.main-content {
+  margin-left: 280px;
+  width: 100%;
+  padding: 0;
+}
+
+.content-wrapper {
+  padding: 40px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+h2 {
+  font-size: 2.2rem;
+  margin: 40px 0 20px;
+  color: var(--dark);
+  position: relative;
+  padding-bottom: 15px;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: var(--gradient-main);
+  border-radius: 2px;
+}
+
+h3 {
+  font-size: 1.6rem;
+  margin: 30px 0 15px;
+  color: var(--text-primary);
+}
+
+h4 {
+  font-size: 1.2rem;
+  margin: 20px 0 10px;
+  color: var(--primary);
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+  border: 1px solid var(--border);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.highlight-box {
+  background: var(--gradient-main);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-box::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.stat-card {
+  background: var(--gradient-main);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: "";
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin: 30px 0;
+}
+
+.feature-card {
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 25px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--gradient-main);
+}
+
+.feature-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-main);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 40px;
+  margin: 30px 0;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gradient-main);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  background: var(--primary);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+.timeline-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.priority-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.priority-item {
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.priority-high {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 2px solid #fca5a5;
+}
+
+.priority-medium {
+  background: #fef3c7;
+  color: #d97706;
+  border: 2px solid #fcd34d;
+}
+
+.priority-low {
+  background: #dbeafe;
+  color: #2563eb;
+  border: 2px solid #93c5fd;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+th {
+  background: var(--dark);
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover {
+  background: #f8fafc;
+}
+
+.color-palette {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 25px 0;
+}
+
+.color-item {
+  text-align: center;
+}
+
+.color-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.color-box:hover {
+  transform: scale(1.05);
+}
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin: 30px 0;
+}
+
+.persona-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  border: 2px solid var(--border);
+  transition: all 0.3s;
+}
+
+.persona-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+}
+
+.persona-avatar {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.tech-badge {
+  background: var(--gradient-main);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.phase-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.phase-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  position: relative;
+  border: 2px solid var(--border);
+}
+
+.phase-number {
+  position: absolute;
+  top: -15px;
+  left: 20px;
+  background: var(--gradient-main);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.quote-box {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border-left: 4px solid var(--primary);
+  padding: 20px 25px;
+  margin: 20px 0;
+  border-radius: 8px;
+  font-style: italic;
+  position: relative;
+}
+
+.quote-box::before {
+  content: """;
+  position: absolute;
+  top: -10px;
+  left: 15px;
+  font-size: 3rem;
+  color: var(--primary);
+  opacity: 0.3;
+}
+
+.mermaid {
+  margin: 30px 0;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+.ui-mockup {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.ui-mockup img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.toggle-menu {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+@media (max-width: 768px) {
+  .toggle-menu {
+    display: block;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .content-wrapper {
+    padding: 20px;
+  }
+  
+  .header-hero h1 {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .sidebar {
+    display: none;
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .toggle-menu {
+    display: none;
+  }
+}
+
+.alert {
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  position: relative;
+  padding-left: 50px;
+}
+
+.alert::before {
+  content: "ℹ️";
+  position: absolute;
+  left: 15px;
+  font-size: 1.5rem;
+}
+
+.alert-info {
+  background: #dbeafe;
+  border: 1px solid #60a5fa;
+  color: #1e40af;
+}
+
+.alert-success {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.alert-warning {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 5px;
+}
+
+.badge-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.badge-success {
+  background: var(--success);
+  color: white;
+}
+
+.badge-warning {
+  background: var(--warning);
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<button class="toggle-menu" onclick="toggleSidebar()">☰</button>
+
+<div class="header-hero">
+  <h1>🎨 Shibuya Live Canvas</h1>
+  <p class="subtitle">渋谷の"いま"を映し出す次世代市民共創プラットフォーム</p>
+  <div class="version-badge">完全版要件定義書 Ver.2.0</div>
+</div>
+
+<div class="container">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>📍 Live Canvas</h2>
+    <small>要件定義書 完全版</small>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">プロジェクト概要</div>
+    <a href="#vision" class="nav-item active">ビジョン・ミッション</a>
+    <a href="#background" class="nav-item">背景と課題認識</a>
+    <a href="#concept" class="nav-item">プロダクトコンセプト</a>
+    <a href="#evolution" class="nav-item">3段階進化論</a>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">ユーザー体験</div>
+    <a href="#personas" class="nav-item">ペルソナ設定</a>
+    <a href="#usecases" class="nav-item">ユースケース</a>
+    <a href="#ui-design" class="nav-item">UI/UXデザイン</a>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">機能要件</div>
+    <a href="#core-features" class="nav-item">コア機能詳細</a>
+    <a href="#requirements" class="nav-item">要望一覧</a>
+    <a href="#mvp-scope" class="nav-item">MVPスコープ</a>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">技術仕様</div>
+    <a href="#architecture" class="nav-item">システム構成</a>
+    <a href="#tech-stack" class="nav-item">技術スタック</a>
+    <a href="#database" class="nav-item">データ設計</a>
+    <a href="#security" class="nav-item">セキュリティ</a>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">ビジネス戦略</div>
+    <a href="#business-model" class="nav-item">収益モデル</a>
+    <a href="#growth" class="nav-item">成長戦略</a>
+    <a href="#partnerships" class="nav-item">連携戦略</a>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">プロジェクト管理</div>
+    <a href="#schedule" class="nav-item">開発スケジュール</a>
+    <a href="#team" class="nav-item">チーム体制</a>
+    <a href="#risks" class="nav-item">リスク管理</a>
+    <a href="#presentation" class="nav-item">プレゼン戦略</a>
+  </div>
+  
+  <div class="nav-section">
+    <div class="nav-section-title">設定・その他</div>
+    <a href="#kpi" class="nav-item">KPI・成功指標</a>
+    <a href="#config" class="nav-item">環境設定</a>
+  </div>
+</aside>
+
+<main class="main-content">
+<div class="content-wrapper">
+
+<section id="vision">
+  <h2>🎯 ビジョン・ミッション</h2>
+  
+  <div class="highlight-box">
+    <h3>Ultimate Vision - 究極の未来像</h3>
+    <p style="font-size: 1.2rem; line-height: 1.8;">
+      「渋谷を、言語や国籍、世代を超えて、誰もが"いま、ここで起きていること"を共有し、
+      街の未来を共に創造できる、世界で最もダイナミックな"生きたキャンバス"にする。」
+    </p>
+  </div>
+  
+  <div class="card">
+    <h3>Mission - 我々の使命</h3>
+    <div class="quote-box">
+      位置情報に紐づく"リアルタイムな体験と感情"を集約・可視化することで、
+      人々の日常に発見と共感を生み出し、市民と行政の間に存在する"見えない壁"を溶かす。
+    </div>
+    
+    <div class="alert alert-info">
+      <strong>重要な宣言：</strong>
+      我々は単なる「課題解決ツール」を作るのではない。渋谷という街そのものを舞台にした、
+      <strong>リアルタイム参加型エンターテインメント</strong>を創造する。
+      行政の課題解決は、その熱狂が生み出す"結果"に過ぎない。
+    </div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">30万人</div>
+      <div class="stat-label">想定月間アクティブユーザー</div>
+    </div>
+    <div class="stat-card" style="background: var(--gradient-accent);">
+      <div class="stat-number">4言語</div>
+      <div class="stat-label">多言語対応（日英中韓）</div>
+    </div>
+    <div class="stat-card" style="background: var(--gradient-success);">
+      <div class="stat-number">24/7</div>
+      <div class="stat-label">リアルタイム更新</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">∞</div>
+      <div class="stat-label">無限の可能性</div>
+    </div>
+  </div>
+</section>
+
+<section id="background">
+  <h2>🔍 背景と課題認識</h2>
+  
+  <div class="card">
+    <h3>なぜこのアプローチが"勝つ"のか</h3>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h4>若者の"無関心"の正体</h4>
+        <p>彼らは政治に無関心なのではない。「自分たちの声が届かない」という無力感と、「面白くない」という体験の欠如が原因。</p>
+        <div class="alert alert-success">
+          まず「面白い」体験を提供し、その先に自然な形で社会参加があるべき
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🏛️</div>
+        <h4>行政DXの罠</h4>
+        <p>多くの行政アプリは「課題解決」を前面に出しすぎるため、利用者が限定される。</p>
+        <div class="alert alert-success">
+          「エンタメ・ライフスタイル」の皮を被ったシビックテックとして、あらゆる層を自然に巻き込む
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🌆</div>
+        <h4>渋谷のダイナミズム</h4>
+        <p>渋谷の魅力は、日々生まれては消えるポップアップストア、展示、ストリートイベントにある。</p>
+        <div class="alert alert-success">
+          この「刹那的な情報」を捉えきれるプラットフォームは存在しない。巨大なチャンス！
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h4>グローバル都市の宿命</h4>
+        <p>外国人住民・観光客の増加は不可逆。彼らの体験や不満は、言語の壁によって可視化されていない。</p>
+        <div class="alert alert-success">
+          多言語対応は「付加機能」ではなく、渋谷の未来を語る上での「必須条件」
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>市場機会の分析</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>既存サービス</th>
+          <th>限界</th>
+          <th>我々の優位性</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Googleマップ</td>
+          <td>過去の口コミ中心、リアルタイム性なし</td>
+          <td>現在進行形の体験を可視化</td>
+        </tr>
+        <tr>
+          <td>X (Twitter)</td>
+          <td>位置情報がバラバラ、地図との連携弱い</td>
+          <td>地図ベースのタイムライン</td>
+        </tr>
+        <tr>
+          <td>行政アプリ</td>
+          <td>堅い、楽しくない、利用者限定的</td>
+          <td>エンタメ要素で全世代を巻き込む</td>
+        </tr>
+        <tr>
+          <td>観光アプリ</td>
+          <td>静的情報、更新頻度低い</td>
+          <td>リアルタイムな"生きた"情報</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="concept">
+  <h2>💡 プロダクトコンセプト</h2>
+  
+  <div class="card">
+    <h3>The Living Canvas & Real-time SNS</h3>
+    
+    <div class="quote-box">
+      我々が創るのは「Shibuya Live Canvas」。これは、渋谷の"いま"を映し出す「生きたキャンバス」であり、
+      Googleマップが過去の口コミなら、我々は「現在進行形の体験」を共有する、次世代のマップ型SNSである。
+      ネガティブな課題報告だけでなく、ポジティブな発見や感動が主役となるプラットフォームだ。
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>🗺️ マップ型SNS</h4>
+        <p>位置情報を軸にした新しいソーシャル体験</p>
+      </div>
+      <div class="feature-card">
+        <h4>⏰ リアルタイム性</h4>
+        <p>「いま」起きていることを即座に共有</p>
+      </div>
+      <div class="feature-card">
+        <h4>🎮 ゲーミフィケーション</h4>
+        <p>Quest機能で楽しく市民参加</p>
+      </div>
+      <div class="feature-card">
+        <h4>🌏 ボーダレス</h4>
+        <p>言語の壁を超えた交流</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="evolution">
+  <h2>📈 3段階進化論</h2>
+  
+  <div class="phase-cards">
+    <div class="phase-card">
+      <div class="phase-number">1</div>
+      <h3 style="margin-top: 40px;">Phase 1: Shibuya Live Canvas</h3>
+      <p><strong>期間：</strong>現在〜6ヶ月</p>
+      <p><strong>コア機能：</strong></p>
+      <ul>
+        <li>リアルタイム・マップ型SNS</li>
+        <li>多言語対応（4言語）</li>
+        <li>イベント/店舗情報集約</li>
+      </ul>
+      <p><strong>目的：</strong>まずは「楽しい」「便利」でユーザーを惹きつける</p>
+      <div class="badge badge-primary">ハッカソン提案スコープ</div>
+    </div>
+    
+    <div class="phase-card">
+      <div class="phase-number">2</div>
+      <h3 style="margin-top: 40px;">Phase 2: Co-Creation Hub</h3>
+      <p><strong>期間：</strong>1〜3年後</p>
+      <p><strong>進化：</strong></p>
+      <ul>
+        <li>市民の声（感情データ）を行政・企業に提供</li>
+        <li>市民参加型ワークショップ機能</li>
+        <li>データ分析ダッシュボード</li>
+      </ul>
+      <p><strong>目的：</strong>市民の熱量を具体的なまちづくりアクションに繋げる</p>
+      <div class="badge badge-success">共創フェーズ</div>
+    </div>
+    
+    <div class="phase-card">
+      <div class="phase-number">3</div>
+      <h3 style="margin-top: 40px;">Phase 3: Community-Twin</h3>
+      <p><strong>期間：</strong>5〜10年後</p>
+      <p><strong>進化：</strong></p>
+      <ul>
+        <li>AIによる未来予測シミュレーション</li>
+        <li>デジタルツイン連携</li>
+        <li>グローバル展開</li>
+      </ul>
+      <p><strong>目的：</strong>市民のリアルな体験が反映された都市デザイン</p>
+      <div class="badge badge-warning">最終ビジョン</div>
+    </div>
+  </div>
+</section>
+
+<section id="personas">
+  <h2>👥 ペルソナ設定</h2>
+  
+  <div class="persona-grid">
+    <div class="persona-card">
+      <div class="persona-avatar" style="background: var(--gradient-main);">
+        👨‍🎓
+      </div>
+      <h4>ユウキ（20歳）</h4>
+      <p><strong>大学生・Z世代</strong></p>
+      <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
+      <p><strong>ニーズ：</strong></p>
+      <ul style="text-align: left;">
+        <li>限定イベントを見逃したくない</li>
+        <li>友達と体験を共有したい</li>
+        <li>インスタ映えスポット探し</li>
+      </ul>
+      <p><strong>課題：</strong>情報が分散していて見つけられない</p>
+      <div class="quote-box" style="margin-top: 15px;">
+        「3日間限定のポップアップ、また見逃した...」
+      </div>
+    </div>
+    
+    <div class="persona-card">
+      <div class="persona-avatar" style="background: var(--gradient-accent);">
+        👩‍💼
+      </div>
+      <h4>ソフィア（26歳）</h4>
+      <p><strong>外国人観光客・デジタルノマド</strong></p>
+      <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
+      <p><strong>ニーズ：</strong></p>
+      <ul style="text-align: left;">
+        <li>ガイドブックにない体験</li>
+        <li>ローカルとの交流</li>
+        <li>言語の壁を超えたい</li>
+      </ul>
+      <p><strong>課題：</strong>日本語の情報にアクセスできない</p>
+      <div class="quote-box" style="margin-top: 15px;">
+        「This looks interesting but I can't read Japanese...」
+      </div>
+    </div>
+    
+    <div class="persona-card">
+      <div class="persona-avatar" style="background: var(--gradient-success);">
+        👨‍💼
+      </div>
+      <h4>佐藤（40歳）</h4>
+      <p><strong>渋谷区職員・政策立案者</strong></p>
+      <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
+      <p><strong>ニーズ：</strong></p>
+      <ul style="text-align: left;">
+        <li>市民の生の声を聞きたい</li>
+        <li>施策の効果を可視化</li>
+        <li>若者の参加促進</li>
+      </ul>
+      <p><strong>課題：</strong>従来の方法では若者にリーチできない</p>
+      <div class="quote-box" style="margin-top: 15px;">
+        「アンケートの回答率、また5%か...」
+      </div>
+    </div>
+    
+    <div class="persona-card">
+      <div class="persona-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+        👩‍🍳
+      </div>
+      <h4>田中（35歳）</h4>
+      <p><strong>カフェオーナー・個人事業主</strong></p>
+      <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
+      <p><strong>ニーズ：</strong></p>
+      <ul style="text-align: left;">
+        <li>新規顧客の獲得</li>
+        <li>イベント告知の拡散</li>
+        <li>地域コミュニティ形成</li>
+      </ul>
+      <p><strong>課題：</strong>広告費が高く、効果が見えない</p>
+      <div class="quote-box" style="margin-top: 15px;">
+        「せっかくの新メニュー、もっと知ってもらいたい」
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="usecases">
+  <h2>🎬 ユースケース</h2>
+  
+  <div class="card">
+    <h3>具体的な利用シーン</h3>
+    
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>🎓 大学生ユウキの1日</h4>
+          <p><strong>10:00</strong> - 授業の合間にアプリを開く</p>
+          <p><strong>10:01</strong> - 大学近くで3日間限定ポップアップストア発見！</p>
+          <p><strong>10:05</strong> - 友達にシェア、みんなで行くことに</p>
+          <p><strong>12:30</strong> - 「限定グッズGET！」と写真付きで投稿</p>
+          <p><strong>13:00</strong> - 他の学生からの「いいね」でプチバズ</p>
+          <p><strong>効果：</strong>情報の発見→共有→拡散の好循環</p>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>🌍 観光客ソフィアの発見</h4>
+          <p><strong>14:00</strong> - スクランブル交差点でアプリ起動</p>
+          <p><strong>14:02</strong> - 日本人の投稿「屋上からの眺め最高！」を翻訳</p>
+          <p><strong>14:15</strong> - ガイドブックにない絶景スポット到着</p>
+          <p><strong>14:20</strong> - 母国語で感動を投稿</p>
+          <p><strong>14:25</strong> - 日本人から「Welcome to Shibuya!」</p>
+          <p><strong>効果：</strong>言語を超えた交流と発見</p>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>🏛️ 行政職員佐藤の施策立案</h4>
+          <p><strong>09:00</strong> - 新公園の利用促進Quest配信</p>
+          <p><strong>〜17:00</strong> - 市民から200件の投稿</p>
+          <p><strong>翌日</strong> - データ分析で想定外のニーズ発見</p>
+          <p><strong>1週間後</strong> - 施策に反映、議会資料に活用</p>
+          <p><strong>効果：</strong>エビデンスベースの政策立案</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ui-design">
+  <h2>🎨 UI/UXデザイン</h2>
+  
+  <div class="card">
+    <h3>デザインコンセプト</h3>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>案1: ダイナミック・ネオン</h4>
+        <p><strong>ターゲット：</strong>Z世代、若者層</p>
+        <p><strong>特徴：</strong></p>
+        <ul>
+          <li>ダークモードベース</li>
+          <li>ネオンカラーのアクセント</li>
+          <li>グラスモーフィズム効果</li>
+          <li>時間帯で変化する演出</li>
+        </ul>
+        <div class="ui-mockup">
+          <img src="./ui-dark-mode.png" alt="ダークモードUI" style="max-width: 300px;">
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <h4>案2: クリーン・ミニマル</h4>
+        <p><strong>ターゲット：</strong>全世代、行政連携</p>
+        <p><strong>特徴：</strong></p>
+        <ul>
+          <li>ライトモード中心</li>
+          <li>高い視認性</li>
+          <li>Material Design 3準拠</li>
+          <li>アクセシビリティ重視</li>
+        </ul>
+        <div class="ui-mockup">
+          <img src="./ui-light-mode.png" alt="ライトモードUI" style="max-width: 300px;">
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>カラーパレット</h3>
+    <div class="color-palette">
+      <div class="color-item">
+        <div class="color-box" style="background: #667eea;">Primary</div>
+        <small>#667eea</small>
+      </div>
+      <div class="color-item">
+        <div class="color-box" style="background: #ec4899;">Accent</div>
+        <small>#ec4899</small>
+      </div>
+      <div class="color-item">
+        <div class="color-box" style="background: #10b981;">Success</div>
+        <small>#10b981</small>
+      </div>
+      <div class="color-item">
+        <div class="color-box" style="background: #f59e0b;">Warning</div>
+        <small>#f59e0b</small>
+      </div>
+      <div class="color-item">
+        <div class="color-box" style="background: #ef4444;">Danger</div>
+        <small>#ef4444</small>
+      </div>
+      <div class="color-item">
+        <div class="color-box" style="background: #1e293b;">Dark</div>
+        <small>#1e293b</small>
+      </div>
+      <div class="color-item">
+        <div class="color-box" style="background: #f8fafc; color: #333!important; border: 1px solid #e2e8f0;">Light</div>
+        <small>#f8fafc</small>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>UIモックアップギャラリー</h3>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>マップビュー</h4>
+        <p>リアルタイムの渋谷を可視化</p>
+        <div class="ui-mockup">
+          <img src="./map-view.png" alt="マップビュー" style="width: 100%; border-radius: 8px;">
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <h4>管理ダッシュボード</h4>
+        <p>データ分析と統計情報</p>
+        <div class="ui-mockup">
+          <img src="./dashboard.png" alt="ダッシュボード" style="width: 100%; border-radius: 8px;">
+        </div>
+      </div>
+      
+      <div class="feature-card">
+        <h4>Quest機能</h4>
+        <p>ゲーミフィケーション要素</p>
+        <div class="ui-mockup">
+          <img src="./quest-ui.png" alt="Quest UI" style="width: 100%; border-radius: 8px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="core-features">
+  <h2>⚡ コア機能詳細</h2>
+  
+  <div class="card">
+    <h3>機能1: 地図タイムライン (The Live Map Timeline)</h3>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>UI/UX設計</h4>
+        <ul>
+          <li>地図がメインのタイムライン表示</li>
+          <li>時間軸スライダーで過去・現在・未来を操作</li>
+          <li>アニメーションでピンが出現/消失</li>
+          <li>直感的で楽しいインターフェース</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <h4>情報レイヤー</h4>
+        <ul>
+          <li><strong>公式イベントピン：</strong>行政・店舗の登録情報</li>
+          <li><strong>Live Post：</strong>ユーザーの「いま、ここ」投稿</li>
+          <li><strong>Quest：</strong>お題エリアの可視化</li>
+          <li><strong>ヒートマップ：</strong>盛り上がりの可視化</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <h4>鮮度管理アルゴリズム</h4>
+        <ul>
+          <li>時間経過で透明度が減少（フェードアウト）</li>
+          <li>「いま」の情報が最も目立つ設計</li>
+          <li>24時間で完全に消失</li>
+          <li>重要度に応じた減衰速度調整</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="mermaid">
+      graph LR
+        A[ユーザー投稿] --> B[位置情報取得]
+        B --> C[タイムスタンプ付与]
+        C --> D[地図上に表示]
+        D --> E[時間経過]
+        E --> F[透明度減少]
+        F --> G[24時間後消失]
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>機能2: エンゲージメントエンジン</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>機能名</th>
+          <th>説明</th>
+          <th>トリガー条件</th>
+          <th>期待効果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>スマート通知</td>
+          <td>位置・時間・興味に基づく通知</td>
+          <td>500m以内にイベント発生</td>
+          <td>参加率30%向上</td>
+        </tr>
+        <tr>
+          <td>Quest（お題）</td>
+          <td>ゲーム感覚の市民参加</td>
+          <td>エリア進入時</td>
+          <td>投稿数5倍増</td>
+        </tr>
+        <tr>
+          <td>バッジシステム</td>
+          <td>投稿・参加の可視化</td>
+          <td>特定アクション達成</td>
+          <td>継続率40%向上</td>
+        </tr>
+        <tr>
+          <td>ランキング</td>
+          <td>エリア別貢献度表示</td>
+          <td>週次/月次更新</td>
+          <td>競争心による活性化</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="card">
+    <h3>機能3: ボーダーレスコミュニケーション</h3>
+    
+    <div class="alert alert-info">
+      <strong>多言語対応は必須条件：</strong>
+      渋谷の外国人比率は年々増加。言語の壁を技術で解決することが、真のダイバーシティを実現する。
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>自動UI切り替え</h4>
+        <p>端末の言語設定を検出し、自動でUI言語を切り替え（日・英・中・韓）</p>
+      </div>
+      <div class="feature-card">
+        <h4>リアルタイム翻訳</h4>
+        <p>DeepL APIによる高精度翻訳。ワンタップで投稿を母国語に変換</p>
+      </div>
+      <div class="feature-card">
+        <h4>文化的配慮</h4>
+        <p>各言語圏の文化に配慮したコンテンツ表示とモデレーション</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="requirements">
+  <h2>📋 要望一覧と優先順位</h2>
+  
+  <div class="card">
+    <h3>機能要望マトリックス</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>要望内容</th>
+          <th>優先度</th>
+          <th>実装難易度</th>
+          <th>予想工数</th>
+          <th>ビジネス価値</th>
+          <th>備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>リアルタイム地図表示</td>
+          <td><span class="priority-high">高</span></td>
+          <td><span class="priority-medium">中</span></td>
+          <td>2週間</td>
+          <td>★★★★★</td>
+          <td>MVP必須・コア機能</td>
+        </tr>
+        <tr>
+          <td>多言語対応（4言語）</td>
+          <td><span class="priority-high">高</span></td>
+          <td><span class="priority-high">高</span></td>
+          <td>3週間</td>
+          <td>★★★★★</td>
+          <td>差別化要因</td>
+        </tr>
+        <tr>
+          <td>ユーザー投稿（Live Post）</td>
+          <td><span class="priority-high">高</span></td>
+          <td><span class="priority-low">低</span></td>
+          <td>1週間</td>
+          <td>★★★★★</td>
+          <td>UGCの基盤</td>
+        </tr>
+        <tr>
+          <td>鮮度管理システム</td>
+          <td><span class="priority-high">高</span></td>
+          <td><span class="priority-medium">中</span></td>
+          <td>1週間</td>
+          <td>★★★★☆</td>
+          <td>リアルタイム性の担保</td>
+        </tr>
+        <tr>
+          <td>スマート通知</td>
+          <td><span class="priority-medium">中</span></td>
+          <td><span class="priority-medium">中</span></td>
+          <td>2週間</td>
+          <td>★★★★☆</td>
+          <td>エンゲージメント向上</td>
+        </tr>
+        <tr>
+          <td>Quest機能</td>
+          <td><span class="priority-medium">中</span></td>
+          <td><span class="priority-low">低</span></td>
+          <td>1週間</td>
+          <td>★★★★☆</td>
+          <td>ゲーミフィケーション</td>
+        </tr>
+        <tr>
+          <td>イベント登録ツール</td>
+          <td><span class="priority-high">高</span></td>
+          <td><span class="priority-low">低</span></td>
+          <td>1週間</td>
+          <td>★★★★☆</td>
+          <td>B2B機能</td>
+        </tr>
+        <tr>
+          <td>統計ダッシュボード</td>
+          <td><span class="priority-low">低</span></td>
+          <td><span class="priority-medium">中</span></td>
+          <td>2週間</td>
+          <td>★★★☆☆</td>
+          <td>Phase2で実装</td>
+        </tr>
+        <tr>
+          <td>AIレコメンド</td>
+          <td><span class="priority-low">低</span></td>
+          <td><span class="priority-high">高</span></td>
+          <td>4週間</td>
+          <td>★★★☆☆</td>
+          <td>将来拡張</td>
+        </tr>
+        <tr>
+          <td>AR機能</td>
+          <td><span class="priority-low">低</span></td>
+          <td><span class="priority-high">高</span></td>
+          <td>6週間</td>
+          <td>★★☆☆☆</td>
+          <td>Phase3検討</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="card">
+    <h3>優先度マトリックス</h3>
+    <div class="priority-matrix">
+      <div class="priority-item priority-high">
+        <h4>必須機能（P0）</h4>
+        <p>地図表示・投稿・多言語</p>
+      </div>
+      <div class="priority-item priority-medium">
+        <h4>重要機能（P1）</h4>
+        <p>通知・Quest・分析</p>
+      </div>
+      <div class="priority-item priority-low">
+        <h4>将来機能（P2）</h4>
+        <p>AI・AR・予測</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mvp-scope">
+  <h2>🚀 MVPスコープ定義</h2>
+  
+  <div class="card">
+    <h3>ハッカソンで実装する機能</h3>
+    
+    <div class="alert alert-warning">
+      <strong>重要：</strong>このスコープは極めて現実的であり、デモで「未来のSNSの片鱗」を強烈に印象付けることができる。
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>✅ 実装する</h4>
+        <ul>
+          <li>地図上にイベント/投稿ピン表示</li>
+          <li>時間経過でフェードアウト</li>
+          <li>テキスト投稿機能</li>
+          <li>DeepL APIによる簡易翻訳</li>
+          <li>主催者向け登録フォーム</li>
+          <li>基本的な通知機能</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <h4>⏸️ Phase2に延期</h4>
+        <ul>
+          <li>高度な分析ダッシュボード</li>
+          <li>AIレコメンデーション</li>
+          <li>ワークショップ機能</li>
+          <li>行政連携API</li>
+          <li>収益化機能</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <h4>❌ スコープ外</h4>
+        <ul>
+          <li>AR機能</li>
+          <li>デジタルツイン連携</li>
+          <li>予測シミュレーション</li>
+          <li>ブロックチェーン</li>
+          <li>メタバース連携</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <h2>🏗️ システム構成</h2>
+  
+  <div class="card">
+    <h3>全体アーキテクチャ</h3>
+    
+    <div class="mermaid">
+      graph TB
+        subgraph "Frontend Layer"
+          A[React Native App<br/>iOS/Android]
+          B[Web管理画面<br/>React]
+          C[Landing Page<br/>Next.js]
+        end
+        
+        subgraph "API Gateway"
+          D[FastAPI<br/>REST/WebSocket]
+        end
+        
+        subgraph "Backend Services"
+          E[認証サービス<br/>Firebase Auth]
+          F[投稿サービス<br/>Python]
+          G[通知サービス<br/>FCM/APNs]
+          H[翻訳サービス<br/>DeepL Wrapper]
+        end
+        
+        subgraph "Data Layer"
+          I[(PostgreSQL<br/>+PostGIS)]
+          J[(Redis<br/>Cache)]
+          K[(S3<br/>画像Storage)]
+        end
+        
+        subgraph "External APIs"
+          L[DeepL API]
+          M[Mapbox]
+          N[Google Places]
+        end
+        
+        A --> D
+        B --> D
+        C --> D
+        D --> E
+        D --> F
+        D --> G
+        D --> H
+        F --> I
+        F --> J
+        F --> K
+        H --> L
+        A --> M
+        F --> N
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>データフロー設計</h3>
+    
+    <div class="mermaid">
+      sequenceDiagram
+        participant U as ユーザー
+        participant A as モバイルApp
+        participant API as API Gateway
+        participant DB as Database
+        participant T as 翻訳API
+        participant N as 通知Service
+        
+        U->>A: 投稿作成
+        A->>A: 位置情報取得
+        A->>API: POST /posts
+        API->>DB: 投稿保存
+        API->>T: 翻訳リクエスト
+        T-->>API: 翻訳結果
+        API->>DB: 翻訳保存
+        API-->>A: 投稿完了
+        API->>N: 近隣ユーザー抽出
+        N->>N: 通知条件判定
+        N-->>U: Push通知
+    </div>
+  </div>
+</section>
+
+<section id="tech-stack">
+  <h2>💻 技術スタック</h2>
+  
+  <div class="card">
+    <h3>選定技術と理由</h3>
+    
+    <div class="tech-stack">
+      <span class="tech-badge">React Native</span>
+      <span class="tech-badge">TypeScript</span>
+      <span class="tech-badge">FastAPI</span>
+      <span class="tech-badge">PostgreSQL</span>
+      <span class="tech-badge">PostGIS</span>
+      <span class="tech-badge">Redis</span>
+      <span class="tech-badge">Docker</span>
+      <span class="tech-badge">AWS</span>
+      <span class="tech-badge">GitHub Actions</span>
+    </div>
+    
+    <table style="margin-top: 30px;">
+      <thead>
+        <tr>
+          <th>カテゴリ</th>
+          <th>技術選定</th>
+          <th>選定理由</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>モバイル</td>
+          <td>React Native</td>
+          <td>iOS/Android同時開発でスピード重視、Web技術者でも開発可能</td>
+        </tr>
+        <tr>
+          <td>バックエンド</td>
+          <td>Python (FastAPI)</td>
+          <td>高速、型ヒント、自動ドキュメント生成、非同期対応</td>
+        </tr>
+        <tr>
+          <td>データベース</td>
+          <td>PostgreSQL + PostGIS</td>
+          <td>位置情報処理に特化、空間インデックス、高性能</td>
+        </tr>
+        <tr>
+          <td>キャッシュ</td>
+          <td>Redis</td>
+          <td>リアルタイムデータの高速処理、セッション管理</td>
+        </tr>
+        <tr>
+          <td>地図</td>
+          <td>Mapbox GL JS</td>
+          <td>カスタマイズ性高い、美しいデザイン、高性能</td>
+        </tr>
+        <tr>
+          <td>翻訳</td>
+          <td>DeepL API</td>
+          <td>自然な翻訳品質、日本語に強い</td>
+        </tr>
+        <tr>
+          <td>認証</td>
+          <td>Firebase Auth</td>
+          <td>ソーシャルログイン対応、セキュア、実装簡単</td>
+        </tr>
+        <tr>
+          <td>通知</td>
+          <td>FCM/APNs</td>
+          <td>クロスプラットフォーム対応、信頼性高い</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="database">
+  <h2>🗄️ データ設計</h2>
+  
+  <div class="card">
+    <h3>データベース設計</h3>
+    
+    <div class="mermaid">
+      erDiagram
+        USER ||--o{ POST : creates
+        USER ||--o{ LIKE : gives
+        USER ||--o{ QUEST_SUBMISSION : submits
+        POST ||--|| LOCATION : has
+        POST ||--o{ COMMENT : has
+        POST ||--o{ TRANSLATION : has
+        EVENT ||--|| LOCATION : has
+        EVENT ||--|| ORGANIZER : has
+        QUEST ||--|| LOCATION : has
+        QUEST ||--o{ QUEST_SUBMISSION : receives
+        
+        USER {
+          uuid id PK
+          string email UK
+          string name
+          string avatar_url
+          string language
+          json preferences
+          timestamp created_at
+          timestamp last_login
+        }
+        
+        POST {
+          uuid id PK
+          uuid user_id FK
+          text content
+          json media_urls
+          point location
+          float opacity
+          string visibility
+          timestamp created_at
+          timestamp expires_at
+        }
+        
+        EVENT {
+          uuid id PK
+          uuid organizer_id FK
+          string title
+          text description
+          point location
+          string venue_name
+          timestamp start_time
+          timestamp end_time
+          json tags
+          string status
+        }
+        
+        TRANSLATION {
+          uuid id PK
+          uuid post_id FK
+          string language
+          text translated_content
+          timestamp created_at
+        }
+        
+        QUEST {
+          uuid id PK
+          string title
+          text description
+          polygon area
+          timestamp start_date
+          timestamp end_date
+          json rewards
+          string sponsor
+        }
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>データモデリングの特徴</h3>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>地物モデリング</h4>
+        <p>恒久的な地物（店舗）と短期的な地物（ポップアップ）を区別して管理</p>
+      </div>
+      <div class="feature-card">
+        <h4>鮮度管理</h4>
+        <p>opacity フィールドで時間経過による重み付けを実装</p>
+      </div>
+      <div class="feature-card">
+        <h4>多言語対応</h4>
+        <p>翻訳を別テーブルで管理し、キャッシュ効率を最適化</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="security">
+  <h2>🔒 セキュリティ要件</h2>
+  
+  <div class="card">
+    <h3>セキュリティ対策</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>カテゴリ</th>
+          <th>対策内容</th>
+          <th>実装方法</th>
+          <th>優先度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>認証・認可</td>
+          <td>多要素認証、JWT</td>
+          <td>Firebase Auth + カスタムクレーム</td>
+          <td><span class="priority-high">高</span></td>
+        </tr>
+        <tr>
+          <td>データ暗号化</td>
+          <td>通信暗号化、保存暗号化</td>
+          <td>HTTPS必須、DB暗号化</td>
+          <td><span class="priority-high">高</span></td>
+        </tr>
+        <tr>
+          <td>位置情報保護</td>
+          <td>精度制限、匿名化オプション</td>
+          <td>100m単位での丸め処理</td>
+          <td><span class="priority-high">高</span></td>
+        </tr>
+        <tr>
+          <td>個人情報管理</td>
+          <td>GDPR/個人情報保護法準拠</td>
+          <td>同意管理、削除権保証</td>
+          <td><span class="priority-high">高</span></td>
+        </tr>
+        <tr>
+          <td>コンテンツモデレーション</td>
+          <td>不適切投稿の検出・削除</td>
+          <td>AI自動検出 + 人力確認</td>
+          <td><span class="priority-medium">中</span></td>
+        </tr>
+        <tr>
+          <td>レート制限</td>
+          <td>API呼び出し制限</td>
+          <td>Redis による制限実装</td>
+          <td><span class="priority-medium">中</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="business-model">
+  <h2>💰 ビジネスモデル</h2>
+  
+  <div class="card">
+    <h3>収益化戦略</h3>
+    
+    <div class="phase-cards">
+      <div class="phase-card">
+        <h4>🎯 Phase 1: ユーザー獲得</h4>
+        <p><strong>0〜6ヶ月</strong></p>
+        <ul>
+          <li>完全無料で提供</li>
+          <li>ユーザーベース構築</li>
+          <li>データ蓄積</li>
+        </ul>
+        <p><strong>目標：</strong>MAU 10万人</p>
+      </div>
+      
+      <div class="phase-card">
+        <h4>💎 Phase 2: マネタイズ開始</h4>
+        <p><strong>6〜18ヶ月</strong></p>
+        <ul>
+          <li>イベントブースト機能（有料）</li>
+          <li>企業スポンサーQuest</li>
+          <li>プレミアム分析機能</li>
+        </ul>
+        <p><strong>目標：</strong>月商500万円</p>
+      </div>
+      
+      <div class="phase-card">
+        <h4>🚀 Phase 3: スケール</h4>
+        <p><strong>18ヶ月〜</strong></p>
+        <ul>
+          <li>データ利活用ビジネス</li>
+          <li>API提供</li>
+          <li>他都市展開</li>
+        </ul>
+        <p><strong>目標：</strong>月商5000万円</p>
+      </div>
+    </div>
+    
+    <div class="alert alert-success">
+      <strong>収益源の多様化：</strong>
+      B2C（ユーザー課金）、B2B（企業向け）、B2G（行政向け）の3本柱で安定成長
+    </div>
+  </div>
+</section>
+
+<section id="growth">
+  <h2>📈 成長戦略</h2>
+  
+  <div class="card">
+    <h3>グロースハック施策</h3>
+    
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>Launch（0-3ヶ月）</h4>
+          <ul>
+            <li>インフルエンサーマーケティング</li>
+            <li>大学生アンバサダー制度</li>
+            <li>ローンチイベント開催</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>Growth（3-6ヶ月）</h4>
+          <ul>
+            <li>リファラルプログラム</li>
+            <li>コンテンツマーケティング</li>
+            <li>SEO/ASO最適化</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>Scale（6-12ヶ月）</h4>
+          <ul>
+            <li>パートナーシップ拡大</li>
+            <li>メディア露出強化</li>
+            <li>国際展開準備</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="partnerships">
+  <h2>🤝 連携戦略</h2>
+  
+  <div class="card">
+    <h3>戦略的パートナーシップ</h3>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>🏛️ 行政連携</h4>
+        <ul>
+          <li>渋谷区役所との実証実験</li>
+          <li>公式観光アプリ認定</li>
+          <li>DX推進予算の活用</li>
+          <li>オープンデータ連携</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🎓 教育機関連携</h4>
+        <ul>
+          <li>大学との共同研究</li>
+          <li>探究学習での活用</li>
+          <li>インターンプログラム</li>
+          <li>学生割引・特典</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🏢 企業連携</h4>
+        <ul>
+          <li>商業施設との情報連携</li>
+          <li>イベント会社とのAPI連携</li>
+          <li>観光業界とのデータ共有</li>
+          <li>スタートアップ協業</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="schedule">
+  <h2>📅 開発スケジュール</h2>
+  
+  <div class="card">
+    <h3>プロジェクトロードマップ</h3>
+    
+    <div class="mermaid">
+      gantt
+        title 開発スケジュール 2025
+        dateFormat YYYY-MM-DD
+        
+        section 準備フェーズ
+        要件定義         :done, req, 2025-01-15, 7d
+        設計・モック作成  :done, design, 2025-01-22, 5d
+        
+        section ハッカソン
+        MVP開発         :active, dev, 2025-01-27, 4d
+        デモ準備        :demo, 2025-01-30, 1d
+        プレゼン        :milestone, present, 2025-01-31, 0d
+        
+        section Phase1開発
+        詳細設計        :p1design, 2025-02-03, 14d
+        コア機能実装    :p1dev, 2025-02-17, 30d
+        テスト         :p1test, 2025-03-19, 14d
+        リリース準備    :p1release, 2025-04-02, 7d
+        
+        section Phase2開発
+        機能拡張       :p2dev, 2025-04-09, 60d
+        行政連携構築    :p2gov, 2025-05-01, 30d
+        
+        section Phase3準備
+        AI/ML開発      :p3ai, 2025-07-01, 90d
+        国際展開準備    :p3global, 2025-09-01, 60d
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>重要マイルストーン</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>日付</th>
+          <th>マイルストーン</th>
+          <th>成果物</th>
+          <th>成功基準</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2025/01/31</td>
+          <td>ハッカソン発表</td>
+          <td>MVPデモ</td>
+          <td>優勝🏆</td>
+        </tr>
+        <tr>
+          <td>2025/04/09</td>
+          <td>β版リリース</td>
+          <td>iOSβ/Androidアプリ</td>
+          <td>1000人テスター</td>
+        </tr>
+        <tr>
+          <td>2025/07/01</td>
+          <td>正式リリース</td>
+          <td>公開版アプリ</td>
+          <td>DAU 1万人</td>
+        </tr>
+        <tr>
+          <td>2025/10/01</td>
+          <td>収益化開始</td>
+          <td>有料機能</td>
+          <td>月商100万円</td>
+        </tr>
+        <tr>
+          <td>2026/01/01</td>
+          <td>他都市展開</td>
+          <td>新宿・原宿版</td>
+          <td>3都市展開</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="team">
+  <h2>👥 チーム体制</h2>
+  
+  <div class="card">
+    <h3>開発チーム構成</h3>
+    
+    <div class="alert alert-info">
+      <strong>チーム方針：</strong>
+      少数精鋭のアジャイルチーム。全員がプロダクトオーナーシップを持ち、高速でイテレーション。
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>役割</th>
+          <th>人数</th>
+          <th>責任範囲</th>
+          <th>必要スキル</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>プロダクトマネージャー</td>
+          <td>1名</td>
+          <td>ビジョン策定、優先順位決定</td>
+          <td>ビジネス理解、UX設計</td>
+        </tr>
+        <tr>
+          <td>テックリード</td>
+          <td>1名</td>
+          <td>技術選定、アーキテクチャ設計</td>
+          <td>フルスタック開発、設計力</td>
+        </tr>
+        <tr>
+          <td>モバイルエンジニア</td>
+          <td>2名</td>
+          <td>React Native開発</td>
+          <td>React Native、TypeScript</td>
+        </tr>
+        <tr>
+          <td>バックエンドエンジニア</td>
+          <td>2名</td>
+          <td>API開発、インフラ構築</td>
+          <td>Python、PostgreSQL、AWS</td>
+        </tr>
+        <tr>
+          <td>UI/UXデザイナー</td>
+          <td>1名</td>
+          <td>デザインシステム、UI設計</td>
+          <td>Figma、プロトタイピング</td>
+        </tr>
+        <tr>
+          <td>マーケター</td>
+          <td>1名</td>
+          <td>グロース施策、PR</td>
+          <td>SNS運用、分析力</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="risks">
+  <h2>⚠️ リスク管理</h2>
+  
+  <div class="card">
+    <h3>想定リスクと対策</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>リスク項目</th>
+          <th>影響度</th>
+          <th>発生確率</th>
+          <th>対策</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ユーザー獲得の遅れ</td>
+          <td><span class="priority-high">高</span></td>
+          <td>中</td>
+          <td>インフルエンサー連携、PR強化、リファラル導入</td>
+        </tr>
+        <tr>
+          <td>技術的な障害</td>
+          <td><span class="priority-high">高</span></td>
+          <td>低</td>
+          <td>段階的リリース、十分なテスト、監視体制</td>
+        </tr>
+        <tr>
+          <td>競合の参入</td>
+          <td><span class="priority-medium">中</span></td>
+          <td>高</td>
+          <td>差別化機能の強化、特許申請、高速改善</td>
+        </tr>
+        <tr>
+          <td>プライバシー問題</td>
+          <td><span class="priority-high">高</span></td>
+          <td>低</td>
+          <td>法令遵守、透明性確保、オプトアウト機能</td>
+        </tr>
+        <tr>
+          <td>収益化の失敗</td>
+          <td><span class="priority-medium">中</span></td>
+          <td>中</td>
+          <td>複数収益源、早期テスト、ピボット準備</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="presentation">
+  <h2>🎤 ハッカソンプレゼン戦略</h2>
+  
+  <div class="card">
+    <h3>勝利への道筋</h3>
+    
+    <div class="highlight-box">
+      <h4>コンセプトの転換</h4>
+      <p>「行政課題を解決するアプリ」から「渋谷の"いま"を誰もが楽しめる、次世代マップ型SNS」へ</p>
+      <p>行政課題の解決は、その結果として自然に達成される副産物として語る。</p>
+    </div>
+    
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>冒頭（30秒）- 問題提起</h4>
+          <div class="quote-box">
+            「皆さん、Googleマップで見る渋谷は、過去の情報の集積です。
+            Xで見る渋谷は、位置情報がバラバラです。
+            では、渋谷の"いま"は、どこにあるのでしょうか？
+            ...どこにもありません。だから、私たちが創ります。」
+          </div>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>中盤（3分）- デモ</h4>
+          <ul>
+            <li>ポジティブでワクワクするデモ</li>
+            <li>リアルタイムでピンが現れる様子</li>
+            <li>多言語翻訳の驚き体験</li>
+            <li>Quest参加の楽しさ</li>
+          </ul>
+          <p><strong>キーワード：</strong>「これは単なる地図アプリではありません。街を舞台にした、リアルタイム・ソーシャルゲームです」</p>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>締め（30秒）- ビジョン</h4>
+          <div class="quote-box">
+            「我々が創る『Shibuya Live Canvas』は、若者も、外国人も、お年寄りも、
+            誰もが主役になれる、渋谷という街の"劇場"です。
+            行政課題の解決は、この劇場が盛り上がった先に待っている、最高のアンコールに過ぎません。
+            さあ、一緒に、この舞台の幕を開けましょう。」
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="alert alert-success">
+      <strong>差別化ポイント：</strong>
+      技術的な説明は最小限に。体験価値と未来のワクワクを最大限に伝える。
+      審査員に「これは使ってみたい！」と思わせることが全て。
+    </div>
+  </div>
+</section>
+
+<section id="kpi">
+  <h2>📊 KPI・成功指標</h2>
+  
+  <div class="card">
+    <h3>主要KPI</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>指標</th>
+          <th>3ヶ月後</th>
+          <th>6ヶ月後</th>
+          <th>1年後</th>
+          <th>測定方法</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MAU（月間アクティブユーザー）</td>
+          <td>1万人</td>
+          <td>5万人</td>
+          <td>30万人</td>
+          <td>Firebase Analytics</td>
+        </tr>
+        <tr>
+          <td>DAU/MAU比率</td>
+          <td>20%</td>
+          <td>25%</td>
+          <td>30%</td>
+          <td>継続率分析</td>
+        </tr>
+        <tr>
+          <td>投稿数/日</td>
+          <td>500件</td>
+          <td>3,000件</td>
+          <td>20,000件</td>
+          <td>DB集計</td>
+        </tr>
+        <tr>
+          <td>翻訳利用率</td>
+          <td>10%</td>
+          <td>15%</td>
+          <td>25%</td>
+          <td>API呼び出し数</td>
+        </tr>
+        <tr>
+          <td>イベント登録数</td>
+          <td>50件</td>
+          <td>200件</td>
+          <td>1,000件</td>
+          <td>管理画面</td>
+        </tr>
+        <tr>
+          <td>収益（月商）</td>
+          <td>0円</td>
+          <td>50万円</td>
+          <td>500万円</td>
+          <td>決済システム</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">60%</div>
+      <div class="stat-label">目標継続率（30日）</div>
+    </div>
+    <div class="stat-card" style="background: var(--gradient-accent);">
+      <div class="stat-number">4.5+</div>
+      <div class="stat-label">目標アプリ評価</div>
+    </div>
+    <div class="stat-card" style="background: var(--gradient-success);">
+      <div class="stat-number">50%</div>
+      <div class="stat-label">口コミ獲得率</div>
+    </div>
+  </div>
+</section>
+
+<section id="config">
+  <h2>⚙️ 環境設定</h2>
+  
+  <div class="card">
+    <h3>Claude Code統合設定</h3>
+    
+    <div class="alert alert-warning">
+      <strong>重要：</strong>以下の設定をClaude Codeの設定ファイルまたは環境変数として登録してください
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>設定項目</th>
+          <th>値</th>
+          <th>用途</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>API_BASE_URL</td>
+          <td>https://api.shibuya-live-canvas.jp</td>
+          <td>APIエンドポイント</td>
+        </tr>
+        <tr>
+          <td>DEEPL_API_KEY</td>
+          <td>****-****-****-****</td>
+          <td>翻訳API認証</td>
+        </tr>
+        <tr>
+          <td>MAPBOX_TOKEN</td>
+          <td>pk.****-****-****</td>
+          <td>地図表示</td>
+        </tr>
+        <tr>
+          <td>FIREBASE_CONFIG</td>
+          <td>{...}</td>
+          <td>認証設定</td>
+        </tr>
+        <tr>
+          <td>DATABASE_URL</td>
+          <td>postgresql://...</td>
+          <td>DB接続</td>
+        </tr>
+        <tr>
+          <td>REDIS_URL</td>
+          <td>redis://...</td>
+          <td>キャッシュ</td>
+        </tr>
+        <tr>
+          <td>AWS_ACCESS_KEY</td>
+          <td>AKIA****</td>
+          <td>S3アクセス</td>
+        </tr>
+        <tr>
+          <td>NODE_ENV</td>
+          <td>development</td>
+          <td>実行環境</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="card" style="background: #f8fafc; margin-top: 20px;">
+      <h4>設定コマンド例</h4>
+      <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto;">
+# .env.local ファイルに記載
+API_BASE_URL=https://api.shibuya-live-canvas.jp
+DEEPL_API_KEY=your-deepl-api-key
+MAPBOX_TOKEN=your-mapbox-token
+
+# または環境変数として設定
+export API_BASE_URL=https://api.shibuya-live-canvas.jp
+export DEEPL_API_KEY=your-deepl-api-key
+export MAPBOX_TOKEN=your-mapbox-token</pre>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>開発環境セットアップ</h3>
+    
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>1. リポジトリクローン</h4>
+          <code>git clone https://github.com/shibuya-live-canvas/app.git</code>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>2. 依存関係インストール</h4>
+          <code>npm install && cd ios && pod install</code>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>3. 環境変数設定</h4>
+          <code>cp .env.example .env.local</code>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h4>4. 開発サーバー起動</h4>
+          <code>npm run dev</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="card" style="margin-top: 50px; text-align: center; background: var(--gradient-main); color: white;">
+  <h2 style="color: white; border: none;">🚀 さあ、渋谷の未来を創ろう</h2>
+  <p style="font-size: 1.2rem; margin: 20px 0;">
+    この要件定義書は、我々の情熱と戦略のすべてが詰まった設計図です。<br>
+    技術とエンターテインメントの融合で、世界を変える第一歩を踏み出します。
+  </p>
+  <div class="version-badge" style="margin-top: 20px;">
+    Together, We Create the Future of Shibuya
+  </div>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+mermaid.initialize({ 
+  startOnLoad: true,
+  theme: 'default',
+  themeVariables: {
+    primaryColor: '#667eea',
+    primaryTextColor: '#fff',
+    primaryBorderColor: '#5a67d8',
+    lineColor: '#667eea',
+    secondaryColor: '#ec4899',
+    tertiaryColor: '#f8fafc',
+    background: '#ffffff',
+    mainBkg: '#667eea',
+    secondBkg: '#ec4899',
+    tertiaryBkg: '#f8fafc'
+  }
+});
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('active');
+}
+
+// Smooth scroll and active nav
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    const target = this.getAttribute('href');
+    const element = document.querySelector(target);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Update active nav on scroll
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('section');
+  const navItems = document.querySelectorAll('.nav-item');
+  
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop;
+    const sectionHeight = section.clientHeight;
+    if (pageYOffset >= sectionTop - 100) {
+      current = section.getAttribute('id');
+    }
+  });
+  
+  navItems.forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('href') === `#${current}`) {
+      item.classList.add('active');
+    }
+  });
+});
+
+// Add animation on scroll
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.card, .feature-card, .stat-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s, transform 0.5s';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,930 @@
+# 基本設計書（外部設計書）
+# ============================================
+# プロジェクト: Shibuya Live Canvas
+# ドキュメントID: BDS-SLC-001
+# バージョン: 1.0.0
+# 作成日: 2025-08-22
+# ステータス: 承認済み
+
+# ====================
+# 1. システム全体構成
+# ====================
+system_architecture:
+  overview:
+    architecture_pattern: "Microservices with Event-Driven Architecture"
+    deployment_model: "Cloud Native (AWS)"
+    communication: "REST API + Message Queue + WebSocket"
+    
+  layers:
+    presentation:
+      description: "ユーザーインターフェース層"
+      components:
+        - name: "Mobile App"
+          technology: "React Native"
+          responsibility: "iOS/Androidアプリケーション"
+        - name: "Web Dashboard"
+          technology: "Next.js"
+          responsibility: "管理画面・分析ダッシュボード"
+        - name: "Admin Portal"
+          technology: "React Admin"
+          responsibility: "システム管理画面"
+    
+    application:
+      description: "ビジネスロジック層"
+      components:
+        - name: "API Gateway"
+          technology: "Kong"
+          responsibility: "APIルーティング、認証、レート制限"
+        - name: "Microservices"
+          count: 8
+          responsibility: "ドメイン別ビジネスロジック"
+        - name: "Event Bus"
+          technology: "Amazon EventBridge"
+          responsibility: "イベント駆動通信"
+    
+    data:
+      description: "データ永続化層"
+      components:
+        - name: "Primary DB"
+          technology: "PostgreSQL"
+          responsibility: "トランザクショナルデータ"
+        - name: "Document Store"
+          technology: "MongoDB"
+          responsibility: "非構造化データ"
+        - name: "Cache"
+          technology: "Redis"
+          responsibility: "キャッシング"
+        - name: "Object Storage"
+          technology: "S3"
+          responsibility: "メディアファイル"
+    
+    infrastructure:
+      description: "インフラストラクチャ層"
+      components:
+        - name: "Container Orchestration"
+          technology: "EKS"
+          responsibility: "コンテナ管理"
+        - name: "Service Mesh"
+          technology: "Istio"
+          responsibility: "サービス間通信"
+        - name: "CDN"
+          technology: "CloudFront"
+          responsibility: "コンテンツ配信"
+
+# ====================
+# 2. サブシステム設計
+# ====================
+subsystems:
+  
+  user_management_subsystem:
+    id: "SS-001"
+    description: "ユーザー管理サブシステム"
+    
+    components:
+      user_service:
+        responsibility: "ユーザー情報管理"
+        interfaces:
+          - "ユーザー登録"
+          - "プロフィール管理"
+          - "認証・認可"
+        database: "PostgreSQL"
+        
+      auth_service:
+        responsibility: "認証・認可処理"
+        interfaces:
+          - "ログイン/ログアウト"
+          - "トークン管理"
+          - "権限チェック"
+        dependencies:
+          - "User Service"
+          - "Redis (Session)"
+    
+    data_flow:
+      registration:
+        1: "クライアント → API Gateway"
+        2: "API Gateway → Auth Service"
+        3: "Auth Service → User Service"
+        4: "User Service → Database"
+        5: "Response → クライアント"
+  
+  content_management_subsystem:
+    id: "SS-002"
+    description: "コンテンツ管理サブシステム"
+    
+    components:
+      post_service:
+        responsibility: "投稿管理"
+        interfaces:
+          - "投稿作成・編集・削除"
+          - "投稿検索"
+          - "エンゲージメント管理"
+        database: "MongoDB"
+        
+      media_service:
+        responsibility: "メディア処理"
+        interfaces:
+          - "画像アップロード・処理"
+          - "動画アップロード・処理"
+          - "サムネイル生成"
+        storage: "S3"
+        
+      moderation_service:
+        responsibility: "コンテンツモデレーション"
+        interfaces:
+          - "自動モデレーション"
+          - "手動レビュー"
+          - "違反管理"
+        ml_models: "AWS Rekognition"
+  
+  location_subsystem:
+    id: "SS-003"
+    description: "位置情報サブシステム"
+    
+    components:
+      location_service:
+        responsibility: "位置情報処理"
+        interfaces:
+          - "位置情報記録"
+          - "ジオフェンシング"
+          - "近隣検索"
+        database: "PostGIS"
+        
+      map_service:
+        responsibility: "地図表示"
+        interfaces:
+          - "地図タイル配信"
+          - "マーカー管理"
+          - "ルート検索"
+        external_api: "Mapbox"
+  
+  gamification_subsystem:
+    id: "SS-004"
+    description: "ゲーミフィケーションサブシステム"
+    
+    components:
+      quest_service:
+        responsibility: "クエスト管理"
+        interfaces:
+          - "クエスト作成・配信"
+          - "進捗管理"
+          - "達成確認"
+        database: "PostgreSQL"
+        
+      reward_service:
+        responsibility: "報酬管理"
+        interfaces:
+          - "ポイント管理"
+          - "バッジ管理"
+          - "ランキング管理"
+        cache: "Redis"
+  
+  analytics_subsystem:
+    id: "SS-005"
+    description: "分析サブシステム"
+    
+    components:
+      analytics_service:
+        responsibility: "データ分析"
+        interfaces:
+          - "リアルタイム分析"
+          - "バッチ分析"
+          - "レポート生成"
+        database: "ClickHouse"
+        
+      ml_service:
+        responsibility: "機械学習"
+        interfaces:
+          - "推薦システム"
+          - "予測モデル"
+          - "感情分析"
+        framework: "TensorFlow"
+
+# ====================
+# 3. 画面設計（概要）
+# ====================
+screen_design:
+  
+  mobile_screens:
+    
+    home_screen:
+      id: "SCR-M-001"
+      description: "ホーム画面（地図ビュー）"
+      
+      layout:
+        header:
+          height: "60px"
+          elements:
+            - "ロゴ"
+            - "検索バー"
+            - "通知アイコン"
+        
+        main_content:
+          type: "Map View"
+          coverage: "Full screen minus header/footer"
+          overlays:
+            - "投稿マーカー"
+            - "現在地インジケーター"
+            - "タイムスライダー"
+        
+        footer:
+          height: "80px"
+          elements:
+            - "ホーム"
+            - "探索"
+            - "投稿ボタン"
+            - "クエスト"
+            - "プロフィール"
+      
+      interactions:
+        - "ピンチでズーム"
+        - "タップで詳細表示"
+        - "長押しで投稿作成"
+    
+    post_creation_screen:
+      id: "SCR-M-002"
+      description: "投稿作成画面"
+      
+      layout:
+        header:
+          elements:
+            - "キャンセル"
+            - "投稿作成"
+            - "投稿ボタン"
+        
+        content_area:
+          sections:
+            - name: "テキスト入力"
+              type: "Textarea"
+              max_chars: 280
+            - name: "メディア添付"
+              type: "Media picker"
+              max_items: 4
+            - name: "位置情報"
+              type: "Location selector"
+            - name: "公開設定"
+              type: "Dropdown"
+    
+    profile_screen:
+      id: "SCR-M-003"
+      description: "プロフィール画面"
+      
+      layout:
+        profile_header:
+          elements:
+            - "アバター"
+            - "ユーザー名"
+            - "統計情報"
+            - "編集ボタン"
+        
+        content_tabs:
+          - "投稿"
+          - "クエスト"
+          - "バッジ"
+          - "設定"
+  
+  web_screens:
+    
+    dashboard_screen:
+      id: "SCR-W-001"
+      description: "ダッシュボード画面"
+      
+      layout:
+        sidebar:
+          width: "250px"
+          menu_items:
+            - "概要"
+            - "分析"
+            - "投稿管理"
+            - "ユーザー管理"
+            - "設定"
+        
+        main_area:
+          widgets:
+            - type: "KPI Cards"
+              metrics: ["MAU", "投稿数", "エンゲージメント率"]
+            - type: "Line Chart"
+              data: "時系列アクティビティ"
+            - type: "Heat Map"
+              data: "地域別活動"
+            - type: "Data Table"
+              data: "最近の投稿"
+    
+    admin_screen:
+      id: "SCR-W-002"
+      description: "管理画面"
+      
+      sections:
+        moderation_queue:
+          columns:
+            - "コンテンツ"
+            - "報告理由"
+            - "報告数"
+            - "アクション"
+        
+        user_management:
+          features:
+            - "ユーザー検索"
+            - "アカウント状態変更"
+            - "違反履歴確認"
+        
+        system_settings:
+          categories:
+            - "Feature Flags"
+            - "Rate Limits"
+            - "Notification Settings"
+
+# ====================
+# 4. インターフェース設計
+# ====================
+interface_design:
+  
+  external_interfaces:
+    
+    rest_api:
+      base_url: "https://api.shibuyalivecanvas.com"
+      version: "v1"
+      
+      authentication:
+        type: "Bearer Token (JWT)"
+        header: "Authorization"
+        
+      common_headers:
+        request:
+          - "Content-Type: application/json"
+          - "Accept-Language: ja,en"
+          - "X-Request-ID: uuid"
+        
+        response:
+          - "X-Request-ID: uuid"
+          - "X-RateLimit-Remaining: number"
+          - "X-Response-Time: ms"
+      
+      error_format:
+        structure:
+          error:
+            code: "string"
+            message: "string"
+            details: "object (optional)"
+        
+        status_codes:
+          - 200: "Success"
+          - 201: "Created"
+          - 400: "Bad Request"
+          - 401: "Unauthorized"
+          - 403: "Forbidden"
+          - 404: "Not Found"
+          - 429: "Too Many Requests"
+          - 500: "Internal Server Error"
+    
+    websocket_interface:
+      endpoint: "wss://ws.shibuyalivecanvas.com"
+      
+      connection:
+        protocol: "WebSocket"
+        subprotocol: "JSON"
+        heartbeat: "30 seconds"
+      
+      message_types:
+        - type: "location_update"
+          direction: "client → server"
+        - type: "new_post_notification"
+          direction: "server → client"
+        - type: "quest_update"
+          direction: "server → client"
+    
+    third_party_apis:
+      
+      mapbox:
+        endpoints:
+          - "Maps API"
+          - "Geocoding API"
+          - "Directions API"
+        rate_limit: "100,000 requests/month"
+        
+      deepl:
+        endpoints:
+          - "Translation API"
+        rate_limit: "5,000,000 characters/month"
+        
+      stripe:
+        endpoints:
+          - "Payment Intents"
+          - "Subscriptions"
+        compliance: "PCI DSS"
+  
+  internal_interfaces:
+    
+    service_communication:
+      protocol: "gRPC"
+      service_discovery: "Kubernetes DNS"
+      
+      patterns:
+        synchronous:
+          - "Request-Response"
+          - "Circuit Breaker"
+          - "Retry with backoff"
+        
+        asynchronous:
+          - "Event-driven"
+          - "Message Queue"
+          - "Pub-Sub"
+    
+    database_interfaces:
+      
+      postgresql:
+        connection:
+          pool_size: "20-100"
+          timeout: "30s"
+        
+        access_patterns:
+          - "Direct SQL"
+          - "ORM (TypeORM/Prisma)"
+          - "Stored Procedures"
+      
+      mongodb:
+        connection:
+          replica_set: "Yes"
+          read_preference: "Secondary Preferred"
+        
+        access_patterns:
+          - "Native Driver"
+          - "ODM (Mongoose)"
+      
+      redis:
+        connection:
+          cluster: "Yes"
+          persistence: "AOF"
+        
+        usage:
+          - "Session Storage"
+          - "Cache"
+          - "Rate Limiting"
+          - "Pub-Sub"
+
+# ====================
+# 5. データ設計（論理）
+# ====================
+logical_data_design:
+  
+  entities:
+    
+    user:
+      description: "システムユーザー"
+      attributes:
+        - name: "user_id"
+          type: "UUID"
+          key: "PK"
+        - name: "email"
+          type: "VARCHAR(255)"
+          unique: true
+        - name: "username"
+          type: "VARCHAR(50)"
+          unique: true
+        - name: "profile_data"
+          type: "JSON"
+        - name: "created_at"
+          type: "TIMESTAMP"
+      
+      relationships:
+        - entity: "Post"
+          type: "1:N"
+          description: "ユーザーは複数の投稿を作成"
+        - entity: "Quest"
+          type: "M:N"
+          description: "ユーザーは複数のクエストに参加"
+    
+    post:
+      description: "投稿コンテンツ"
+      attributes:
+        - name: "post_id"
+          type: "UUID"
+          key: "PK"
+        - name: "user_id"
+          type: "UUID"
+          key: "FK"
+        - name: "content"
+          type: "TEXT"
+        - name: "location"
+          type: "POINT"
+        - name: "media_urls"
+          type: "JSON"
+        - name: "created_at"
+          type: "TIMESTAMP"
+      
+      relationships:
+        - entity: "User"
+          type: "N:1"
+          description: "投稿は1人のユーザーに属する"
+        - entity: "Comment"
+          type: "1:N"
+          description: "投稿は複数のコメントを持つ"
+    
+    quest:
+      description: "クエスト（チャレンジ）"
+      attributes:
+        - name: "quest_id"
+          type: "UUID"
+          key: "PK"
+        - name: "title"
+          type: "JSON"
+        - name: "requirements"
+          type: "JSON"
+        - name: "rewards"
+          type: "JSON"
+        - name: "location_bounds"
+          type: "POLYGON"
+        - name: "start_time"
+          type: "TIMESTAMP"
+        - name: "end_time"
+          type: "TIMESTAMP"
+      
+      relationships:
+        - entity: "User"
+          type: "M:N"
+          via: "QuestParticipation"
+        - entity: "Location"
+          type: "N:1"
+          description: "クエストは特定の場所に関連"
+  
+  data_flow:
+    
+    post_creation_flow:
+      steps:
+        1: "ユーザーがコンテンツ入力"
+        2: "メディアファイルアップロード"
+        3: "位置情報取得"
+        4: "投稿データ作成"
+        5: "モデレーションチェック"
+        6: "データベース保存"
+        7: "キャッシュ更新"
+        8: "リアルタイム配信"
+      
+      data_transformations:
+        - "画像リサイズ・最適化"
+        - "位置情報の正規化"
+        - "テキストのサニタイズ"
+        - "メタデータ抽出"
+    
+    analytics_flow:
+      steps:
+        1: "イベントデータ収集"
+        2: "ストリーム処理"
+        3: "集計・変換"
+        4: "データウェアハウス格納"
+        5: "分析処理"
+        6: "レポート生成"
+      
+      data_pipeline:
+        ingestion: "Kinesis Data Streams"
+        processing: "Apache Spark"
+        storage: "ClickHouse"
+        visualization: "Grafana"
+
+# ====================
+# 6. バッチ処理設計
+# ====================
+batch_processing:
+  
+  scheduled_jobs:
+    
+    daily_analytics:
+      schedule: "毎日 02:00 JST"
+      description: "日次分析処理"
+      
+      tasks:
+        - "前日のアクティビティ集計"
+        - "ユーザーエンゲージメント計算"
+        - "トレンド分析"
+        - "レポート生成"
+      
+      output:
+        - "分析データベース更新"
+        - "レポートファイル生成"
+        - "メール通知"
+    
+    content_cleanup:
+      schedule: "毎日 03:00 JST"
+      description: "期限切れコンテンツ削除"
+      
+      tasks:
+        - "期限切れ投稿の特定"
+        - "メディアファイル削除"
+        - "データベースクリーンアップ"
+        - "キャッシュ無効化"
+    
+    recommendation_update:
+      schedule: "6時間ごと"
+      description: "推薦モデル更新"
+      
+      tasks:
+        - "ユーザー行動データ収集"
+        - "特徴量計算"
+        - "モデル学習"
+        - "推薦リスト更新"
+  
+  data_migration_jobs:
+    
+    backup_job:
+      schedule: "毎日 01:00 JST"
+      description: "データバックアップ"
+      
+      scope:
+        - "データベースフルバックアップ"
+        - "メディアファイル増分バックアップ"
+        - "設定ファイルバックアップ"
+      
+      destination: "S3 Glacier"
+      retention: "30日間"
+    
+    archive_job:
+      schedule: "毎月1日 00:00 JST"
+      description: "古いデータのアーカイブ"
+      
+      criteria:
+        - "3ヶ月以上前の投稿"
+        - "非アクティブユーザーデータ"
+      
+      process:
+        - "データ抽出"
+        - "圧縮"
+        - "アーカイブストレージへ移動"
+        - "インデックス更新"
+
+# ====================
+# 7. 外部システム連携
+# ====================
+external_system_integration:
+  
+  payment_system:
+    provider: "Stripe"
+    
+    integration_points:
+      customer_management:
+        - "顧客作成"
+        - "支払い方法登録"
+        - "顧客情報更新"
+      
+      payment_processing:
+        - "一回払い処理"
+        - "サブスクリプション管理"
+        - "返金処理"
+      
+      webhooks:
+        - "payment_intent.succeeded"
+        - "customer.subscription.updated"
+        - "charge.refunded"
+    
+    security:
+      - "PCI DSS準拠"
+      - "Webhook署名検証"
+      - "APIキー暗号化"
+  
+  translation_system:
+    provider: "DeepL"
+    
+    integration:
+      api_usage:
+        - "テキスト翻訳"
+        - "言語検出"
+        - "用語集管理"
+      
+      optimization:
+        - "バッチ処理"
+        - "キャッシング"
+        - "フォールバック（Google Translate）"
+    
+    limits:
+      - "月間5,000,000文字"
+      - "リクエスト/秒: 10"
+  
+  mapping_system:
+    provider: "Mapbox"
+    
+    services:
+      - "Maps SDK"
+      - "Geocoding API"
+      - "Directions API"
+      - "Static Images API"
+    
+    customization:
+      - "カスタムスタイル"
+      - "独自マーカー"
+      - "レイヤー管理"
+
+# ====================
+# 8. セキュリティ設計（概要）
+# ====================
+security_design_overview:
+  
+  security_architecture:
+    
+    defense_in_depth:
+      layers:
+        - layer: "Network"
+          controls: ["Firewall", "DDoS Protection", "VPN"]
+        - layer: "Application"
+          controls: ["WAF", "Input Validation", "CSRF Protection"]
+        - layer: "Data"
+          controls: ["Encryption", "Access Control", "Audit Logging"]
+    
+    zero_trust_model:
+      principles:
+        - "Never trust, always verify"
+        - "Least privilege access"
+        - "Assume breach"
+      
+      implementation:
+        - "Multi-factor authentication"
+        - "Microsegmentation"
+        - "Continuous monitoring"
+  
+  threat_model:
+    
+    identified_threats:
+      - threat: "データ漏洩"
+        mitigation: ["暗号化", "アクセス制御", "DLP"]
+      - threat: "DDoS攻撃"
+        mitigation: ["CloudFlare", "Rate Limiting", "Auto-scaling"]
+      - threat: "アカウント乗っ取り"
+        mitigation: ["MFA", "異常検知", "セッション管理"]
+      - threat: "SQLインジェクション"
+        mitigation: ["パラメータ化クエリ", "入力検証", "WAF"]
+    
+    security_controls:
+      preventive:
+        - "認証・認可"
+        - "暗号化"
+        - "入力検証"
+      
+      detective:
+        - "ログ監視"
+        - "異常検知"
+        - "侵入検知"
+      
+      corrective:
+        - "インシデント対応"
+        - "バックアップ・リストア"
+        - "パッチ管理"
+
+# ====================
+# 9. 性能設計
+# ====================
+performance_design:
+  
+  performance_targets:
+    response_time:
+      api: "< 500ms (p95)"
+      page_load: "< 3s"
+      database_query: "< 100ms"
+    
+    throughput:
+      requests_per_second: "10,000"
+      concurrent_users: "100,000"
+      data_processing: "1GB/s"
+    
+    resource_utilization:
+      cpu: "< 70%"
+      memory: "< 80%"
+      network: "< 60%"
+  
+  optimization_strategies:
+    
+    caching:
+      levels:
+        - level: "CDN"
+          cache_time: "24 hours"
+          content: ["Static assets", "Images"]
+        - level: "Application"
+          cache_time: "5 minutes"
+          content: ["API responses", "Computed data"]
+        - level: "Database"
+          cache_time: "1 hour"
+          content: ["Query results", "Aggregations"]
+    
+    database_optimization:
+      - "インデックス最適化"
+      - "クエリ最適化"
+      - "パーティショニング"
+      - "読み取りレプリカ"
+    
+    application_optimization:
+      - "非同期処理"
+      - "バッチ処理"
+      - "遅延読み込み"
+      - "圧縮"
+  
+  scalability_design:
+    
+    horizontal_scaling:
+      auto_scaling:
+        trigger: "CPU > 70% or Request rate > threshold"
+        min_instances: 3
+        max_instances: 100
+      
+      load_balancing:
+        algorithm: "Round Robin with health checks"
+        sticky_sessions: "Optional"
+    
+    vertical_scaling:
+      upgrade_path:
+        - "t3.medium → t3.large → t3.xlarge"
+        - "Memory: 4GB → 8GB → 16GB → 32GB"
+    
+    data_partitioning:
+      strategies:
+        - "Sharding by user_id"
+        - "Time-based partitioning for posts"
+        - "Geographic partitioning"
+
+# ====================
+# 10. 運用設計（概要）
+# ====================
+operational_design_overview:
+  
+  deployment:
+    strategy: "Blue-Green Deployment"
+    
+    environments:
+      - name: "Development"
+        purpose: "開発・テスト"
+        refresh: "On commit"
+      - name: "Staging"
+        purpose: "統合テスト"
+        refresh: "Daily"
+      - name: "Production"
+        purpose: "本番環境"
+        refresh: "Weekly release"
+    
+    ci_cd_pipeline:
+      stages:
+        - "Code commit"
+        - "Build"
+        - "Unit tests"
+        - "Security scan"
+        - "Deploy to staging"
+        - "Integration tests"
+        - "Deploy to production"
+  
+  monitoring:
+    
+    metrics:
+      infrastructure:
+        - "CPU/Memory/Disk usage"
+        - "Network I/O"
+        - "Container health"
+      
+      application:
+        - "Request rate"
+        - "Error rate"
+        - "Response time"
+        - "Business KPIs"
+    
+    alerting:
+      severity_levels:
+        - level: "Critical"
+          response: "Immediate page"
+          examples: ["Service down", "Data breach"]
+        - level: "Warning"
+          response: "Email/Slack"
+          examples: ["High error rate", "Slow response"]
+        - level: "Info"
+          response: "Dashboard"
+          examples: ["Deployment", "Config change"]
+    
+    logging:
+      centralized: "ELK Stack"
+      retention: "30 days hot, 1 year cold"
+      compliance: "Audit trail requirements"
+  
+  maintenance:
+    
+    planned_maintenance:
+      window: "Monday 03:00-05:00 JST"
+      frequency: "Monthly"
+      notification: "7 days advance"
+    
+    backup_recovery:
+      backup:
+        frequency: "Daily full, Hourly incremental"
+        retention: "30 days"
+        testing: "Monthly restore test"
+      
+      disaster_recovery:
+        rpo: "1 hour"
+        rto: "4 hours"
+        dr_site: "Different region"
+    
+    capacity_planning:
+      review: "Quarterly"
+      metrics:
+        - "Growth trends"
+        - "Resource utilization"
+        - "Cost analysis"
+      
+      scaling_triggers:
+        - "80% resource utilization"
+        - "User growth > 20%/month"
+
+# ====================
+# END OF BASIC DESIGN SPECIFICATION
+# ====================

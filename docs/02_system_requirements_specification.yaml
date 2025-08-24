@@ -1,0 +1,1167 @@
+# システム要求仕様書（SRS: System Requirements Specification）
+# ============================================
+# プロジェクト: Shibuya Live Canvas
+# ドキュメントID: SRS-SLC-001
+# バージョン: 1.0.0
+# 作成日: 2025-08-22
+# ステータス: 承認済み
+
+# ====================
+# 1. システム概要
+# ====================
+system_overview:
+  system_name: "Shibuya Live Canvas System"
+  system_id: "SLC-SYSTEM-001"
+  version: "1.0.0"
+  
+  purpose: |
+    本システムは、渋谷区を中心とした位置情報ベースのリアルタイム
+    情報共有プラットフォームを提供し、市民・観光客・企業・行政を
+    つなぐ次世代都市OSとして機能する。
+  
+  scope:
+    included:
+      - "モバイルアプリケーション（iOS/Android）"
+      - "Webダッシュボード"
+      - "バックエンドAPIサービス"
+      - "データ分析基盤"
+      - "管理者向け管理画面"
+    excluded:
+      - "ハードウェア機器の提供"
+      - "既存システムのリプレース"
+      - "サードパーティシステムの運用"
+  
+  system_boundaries:
+    internal_systems:
+      - "認証・認可システム"
+      - "コンテンツ管理システム"
+      - "分析エンジン"
+      - "通知配信システム"
+    
+    external_interfaces:
+      - interface: "地図サービスAPI"
+        provider: "Mapbox"
+      - interface: "翻訳API"
+        provider: "DeepL"
+      - interface: "決済システム"
+        provider: "Stripe"
+      - interface: "プッシュ通知"
+        provider: "Firebase Cloud Messaging"
+
+# ====================
+# 2. システムアーキテクチャ
+# ====================
+system_architecture:
+  
+  architecture_style: "Microservices Architecture"
+  deployment_model: "Cloud Native (Kubernetes)"
+  
+  layers:
+    
+    presentation_layer:
+      description: "ユーザーインターフェース層"
+      components:
+        mobile_app:
+          technology: "React Native"
+          platforms: ["iOS 14+", "Android 8+"]
+          features:
+            - "地図表示"
+            - "投稿作成・閲覧"
+            - "リアルタイム通知"
+            - "多言語切替"
+        
+        web_dashboard:
+          technology: "Next.js + TypeScript"
+          browsers: ["Chrome 90+", "Safari 14+", "Firefox 88+", "Edge 90+"]
+          features:
+            - "データビジュアライゼーション"
+            - "レポート生成"
+            - "管理機能"
+        
+        admin_portal:
+          technology: "React Admin"
+          features:
+            - "コンテンツモデレーション"
+            - "ユーザー管理"
+            - "システム設定"
+    
+    application_layer:
+      description: "ビジネスロジック層"
+      
+      api_gateway:
+        technology: "Kong Gateway"
+        responsibilities:
+          - "ルーティング"
+          - "認証・認可"
+          - "レート制限"
+          - "ロギング"
+      
+      microservices:
+        
+        user_service:
+          technology: "Node.js + NestJS"
+          database: "PostgreSQL"
+          responsibilities:
+            - "ユーザー登録・認証"
+            - "プロフィール管理"
+            - "ソーシャル機能"
+          api_endpoints:
+            - "POST /users/register"
+            - "POST /users/login"
+            - "GET /users/{id}"
+            - "PUT /users/{id}"
+            - "DELETE /users/{id}"
+        
+        content_service:
+          technology: "Go + Gin"
+          database: "MongoDB"
+          responsibilities:
+            - "投稿管理"
+            - "メディア処理"
+            - "コンテンツ配信"
+          api_endpoints:
+            - "POST /posts"
+            - "GET /posts/nearby"
+            - "PUT /posts/{id}"
+            - "DELETE /posts/{id}"
+            - "POST /posts/{id}/like"
+        
+        location_service:
+          technology: "Python + FastAPI"
+          database: "PostGIS"
+          responsibilities:
+            - "位置情報処理"
+            - "ジオフェンシング"
+            - "空間検索"
+          api_endpoints:
+            - "POST /locations/track"
+            - "GET /locations/nearby"
+            - "POST /locations/geofence"
+        
+        quest_service:
+          technology: "Python + Django"
+          database: "PostgreSQL"
+          responsibilities:
+            - "クエスト管理"
+            - "報酬計算"
+            - "進捗トラッキング"
+          api_endpoints:
+            - "GET /quests/available"
+            - "POST /quests/{id}/join"
+            - "POST /quests/{id}/complete"
+            - "GET /quests/leaderboard"
+        
+        notification_service:
+          technology: "Node.js + Express"
+          queue: "RabbitMQ"
+          responsibilities:
+            - "通知生成"
+            - "配信管理"
+            - "プリファレンス管理"
+          api_endpoints:
+            - "POST /notifications/send"
+            - "GET /notifications/user/{id}"
+            - "PUT /notifications/preferences"
+        
+        analytics_service:
+          technology: "Python + Apache Spark"
+          database: "ClickHouse"
+          responsibilities:
+            - "データ集計"
+            - "レポート生成"
+            - "予測分析"
+          api_endpoints:
+            - "GET /analytics/dashboard"
+            - "POST /analytics/report"
+            - "GET /analytics/trends"
+    
+    data_layer:
+      description: "データ永続化層"
+      
+      databases:
+        
+        primary_database:
+          type: "PostgreSQL 15"
+          purpose: "トランザクショナルデータ"
+          configuration:
+            replication: "Master-Slave"
+            backup: "Daily"
+            retention: "30 days"
+        
+        document_store:
+          type: "MongoDB 6.0"
+          purpose: "非構造化データ"
+          configuration:
+            sharding: true
+            replica_sets: 3
+        
+        spatial_database:
+          type: "PostGIS 3.3"
+          purpose: "地理空間データ"
+          configuration:
+            indexing: "R-tree"
+        
+        time_series_database:
+          type: "InfluxDB 2.0"
+          purpose: "メトリクス・ログ"
+          configuration:
+            retention_policy: "90 days"
+        
+        cache_layer:
+          type: "Redis 7.0"
+          purpose: "キャッシング・セッション"
+          configuration:
+            cluster_mode: true
+            persistence: "AOF"
+        
+        search_engine:
+          type: "Elasticsearch 8.0"
+          purpose: "全文検索"
+          configuration:
+            shards: 5
+            replicas: 2
+    
+    infrastructure_layer:
+      description: "インフラストラクチャ層"
+      
+      container_orchestration:
+        platform: "Kubernetes (EKS)"
+        version: "1.27"
+        configuration:
+          nodes:
+            min: 5
+            max: 50
+          auto_scaling: true
+      
+      service_mesh:
+        technology: "Istio"
+        features:
+          - "Traffic management"
+          - "Security"
+          - "Observability"
+      
+      message_queue:
+        technology: "Amazon SQS + SNS"
+        purposes:
+          - "非同期処理"
+          - "イベント駆動"
+          - "システム間連携"
+      
+      cdn:
+        provider: "CloudFront"
+        configuration:
+          edge_locations: "Global"
+          cache_behavior:
+            static_content: "1 year"
+            api_responses: "1 minute"
+
+# ====================
+# 3. システム要件
+# ====================
+system_requirements:
+  
+  functional_requirements:
+    
+    user_management:
+      id: "SR-UM-001"
+      priority: "High"
+      description: "ユーザー管理機能"
+      requirements:
+        - req_id: "SR-UM-001-01"
+          description: "ユーザー登録機能"
+          acceptance_criteria:
+            - "メールアドレスまたはSNSアカウントで登録可能"
+            - "ユーザー名の一意性検証"
+            - "パスワード強度検証"
+        
+        - req_id: "SR-UM-001-02"
+          description: "認証機能"
+          acceptance_criteria:
+            - "JWT基準の認証"
+            - "リフレッシュトークン対応"
+            - "多要素認証オプション"
+        
+        - req_id: "SR-UM-001-03"
+          description: "プロフィール管理"
+          acceptance_criteria:
+            - "プロフィール画像アップロード"
+            - "自己紹介文設定"
+            - "プライバシー設定"
+    
+    content_management:
+      id: "SR-CM-001"
+      priority: "High"
+      description: "コンテンツ管理機能"
+      requirements:
+        - req_id: "SR-CM-001-01"
+          description: "投稿作成機能"
+          acceptance_criteria:
+            - "テキスト投稿（最大280文字）"
+            - "画像添付（最大4枚）"
+            - "動画添付（最大60秒）"
+            - "位置情報タグ付け"
+        
+        - req_id: "SR-CM-001-02"
+          description: "投稿管理機能"
+          acceptance_criteria:
+            - "投稿の編集・削除"
+            - "公開範囲設定"
+            - "有効期限設定"
+        
+        - req_id: "SR-CM-001-03"
+          description: "インタラクション機能"
+          acceptance_criteria:
+            - "いいね機能"
+            - "コメント機能"
+            - "シェア機能"
+            - "ブックマーク機能"
+    
+    location_features:
+      id: "SR-LF-001"
+      priority: "High"
+      description: "位置情報機能"
+      requirements:
+        - req_id: "SR-LF-001-01"
+          description: "位置情報取得"
+          acceptance_criteria:
+            - "GPS精度10m以内"
+            - "屋内測位対応"
+            - "バックグラウンド更新"
+        
+        - req_id: "SR-LF-001-02"
+          description: "地図表示機能"
+          acceptance_criteria:
+            - "リアルタイム更新"
+            - "ズームレベル10-20"
+            - "3Dビュー対応"
+        
+        - req_id: "SR-LF-001-03"
+          description: "ジオフェンシング"
+          acceptance_criteria:
+            - "エリア入退出検知"
+            - "カスタムエリア設定"
+            - "通知トリガー"
+    
+    gamification:
+      id: "SR-GM-001"
+      priority: "Medium"
+      description: "ゲーミフィケーション機能"
+      requirements:
+        - req_id: "SR-GM-001-01"
+          description: "クエストシステム"
+          acceptance_criteria:
+            - "クエスト一覧表示"
+            - "進捗管理"
+            - "報酬付与"
+        
+        - req_id: "SR-GM-001-02"
+          description: "ポイントシステム"
+          acceptance_criteria:
+            - "ポイント獲得"
+            - "ランキング表示"
+            - "ポイント交換"
+        
+        - req_id: "SR-GM-001-03"
+          description: "バッジシステム"
+          acceptance_criteria:
+            - "実績解除"
+            - "バッジ収集"
+            - "プロフィール表示"
+    
+    multilingual_support:
+      id: "SR-ML-001"
+      priority: "High"
+      description: "多言語対応機能"
+      requirements:
+        - req_id: "SR-ML-001-01"
+          description: "UI多言語化"
+          acceptance_criteria:
+            - "日本語・英語・中国語・韓国語対応"
+            - "言語自動検出"
+            - "手動切替機能"
+        
+        - req_id: "SR-ML-001-02"
+          description: "コンテンツ翻訳"
+          acceptance_criteria:
+            - "自動翻訳機能"
+            - "翻訳精度95%以上"
+            - "キャッシュ機能"
+    
+    analytics_reporting:
+      id: "SR-AR-001"
+      priority: "Medium"
+      description: "分析・レポート機能"
+      requirements:
+        - req_id: "SR-AR-001-01"
+          description: "ダッシュボード"
+          acceptance_criteria:
+            - "リアルタイムメトリクス"
+            - "カスタマイズ可能"
+            - "データエクスポート"
+        
+        - req_id: "SR-AR-001-02"
+          description: "レポート生成"
+          acceptance_criteria:
+            - "定期レポート自動生成"
+            - "PDF/CSV形式"
+            - "グラフ・チャート含む"
+  
+  non_functional_requirements:
+    
+    performance:
+      id: "SR-PF-001"
+      category: "パフォーマンス"
+      requirements:
+        - req_id: "SR-PF-001-01"
+          metric: "レスポンスタイム"
+          target: "95%ile < 500ms"
+          measurement: "API Gateway logs"
+        
+        - req_id: "SR-PF-001-02"
+          metric: "スループット"
+          target: "> 10,000 req/sec"
+          measurement: "Load testing"
+        
+        - req_id: "SR-PF-001-03"
+          metric: "同時接続数"
+          target: "> 100,000 users"
+          measurement: "WebSocket connections"
+    
+    availability:
+      id: "SR-AV-001"
+      category: "可用性"
+      requirements:
+        - req_id: "SR-AV-001-01"
+          metric: "稼働率"
+          target: "> 99.9%"
+          measurement: "Uptime monitoring"
+        
+        - req_id: "SR-AV-001-02"
+          metric: "計画停止時間"
+          target: "< 4 hours/month"
+          measurement: "Maintenance logs"
+        
+        - req_id: "SR-AV-001-03"
+          metric: "障害復旧時間"
+          target: "< 1 hour"
+          measurement: "Incident reports"
+    
+    scalability:
+      id: "SR-SC-001"
+      category: "拡張性"
+      requirements:
+        - req_id: "SR-SC-001-01"
+          metric: "水平スケーリング"
+          target: "自動スケール1-100ノード"
+          measurement: "Kubernetes metrics"
+        
+        - req_id: "SR-SC-001-02"
+          metric: "データベース拡張"
+          target: "ペタバイト級対応"
+          measurement: "Storage capacity"
+        
+        - req_id: "SR-SC-001-03"
+          metric: "地理的拡張"
+          target: "マルチリージョン対応"
+          measurement: "Deployment regions"
+    
+    security:
+      id: "SR-SE-001"
+      category: "セキュリティ"
+      requirements:
+        - req_id: "SR-SE-001-01"
+          aspect: "データ暗号化"
+          requirement: "AES-256 (at rest), TLS 1.3 (in transit)"
+          compliance: "NIST standards"
+        
+        - req_id: "SR-SE-001-02"
+          aspect: "アクセス制御"
+          requirement: "OAuth 2.0, RBAC"
+          compliance: "OWASP guidelines"
+        
+        - req_id: "SR-SE-001-03"
+          aspect: "監査ログ"
+          requirement: "全アクセス記録、改ざん防止"
+          compliance: "SOC 2 Type II"
+    
+    usability:
+      id: "SR-US-001"
+      category: "使いやすさ"
+      requirements:
+        - req_id: "SR-US-001-01"
+          metric: "学習時間"
+          target: "< 5分で基本操作習得"
+          measurement: "User testing"
+        
+        - req_id: "SR-US-001-02"
+          metric: "エラー率"
+          target: "< 5%"
+          measurement: "Usage analytics"
+        
+        - req_id: "SR-US-001-03"
+          metric: "満足度"
+          target: "> 4.5/5.0"
+          measurement: "User surveys"
+
+# ====================
+# 4. インターフェース要件
+# ====================
+interface_requirements:
+  
+  user_interfaces:
+    
+    mobile_app_ui:
+      platforms:
+        ios:
+          minimum_version: "14.0"
+          target_devices: ["iPhone", "iPad"]
+          design_guidelines: "Human Interface Guidelines"
+        android:
+          minimum_version: "8.0 (API 26)"
+          target_devices: ["Phones", "Tablets"]
+          design_guidelines: "Material Design 3"
+      
+      screen_specifications:
+        main_map_screen:
+          components:
+            - "Map view (60% of screen)"
+            - "Search bar"
+            - "Filter buttons"
+            - "Floating action button"
+          interactions:
+            - "Pinch to zoom"
+            - "Tap to select"
+            - "Long press to post"
+        
+        post_creation_screen:
+          components:
+            - "Text input field"
+            - "Media attachment"
+            - "Location selector"
+            - "Privacy settings"
+          validations:
+            - "Character limit check"
+            - "Media size validation"
+            - "Location accuracy"
+        
+        profile_screen:
+          components:
+            - "User info section"
+            - "Stats display"
+            - "Post history"
+            - "Settings menu"
+    
+    web_dashboard_ui:
+      supported_browsers:
+        - name: "Chrome"
+          min_version: "90"
+        - name: "Safari"
+          min_version: "14"
+        - name: "Firefox"
+          min_version: "88"
+        - name: "Edge"
+          min_version: "90"
+      
+      responsive_breakpoints:
+        mobile: "< 768px"
+        tablet: "768px - 1024px"
+        desktop: "> 1024px"
+      
+      accessibility:
+        standards: "WCAG 2.1 Level AA"
+        features:
+          - "Keyboard navigation"
+          - "Screen reader support"
+          - "High contrast mode"
+          - "Font size adjustment"
+  
+  external_interfaces:
+    
+    third_party_apis:
+      
+      mapbox_api:
+        endpoint: "https://api.mapbox.com/v4"
+        authentication: "API Key"
+        rate_limit: "100,000 requests/month"
+        operations:
+          - "Get map tiles"
+          - "Geocoding"
+          - "Directions"
+        error_handling:
+          - "Retry with exponential backoff"
+          - "Fallback to cached data"
+      
+      deepl_api:
+        endpoint: "https://api.deepl.com/v2"
+        authentication: "API Key"
+        rate_limit: "5,000,000 characters/month"
+        operations:
+          - "Translate text"
+          - "Detect language"
+        error_handling:
+          - "Queue for retry"
+          - "Fallback to Google Translate"
+      
+      payment_api:
+        provider: "Stripe"
+        endpoint: "https://api.stripe.com/v1"
+        authentication: "Secret Key"
+        operations:
+          - "Create customer"
+          - "Process payment"
+          - "Manage subscription"
+        compliance:
+          - "PCI DSS Level 1"
+          - "Strong Customer Authentication"
+    
+    system_interfaces:
+      
+      database_connections:
+        postgresql:
+          connection_pool:
+            min: 10
+            max: 100
+          timeout: "30 seconds"
+          retry_policy: "3 attempts"
+        
+        mongodb:
+          connection_string: "mongodb://cluster0.mongodb.net"
+          replica_set: "rs0"
+          read_preference: "primaryPreferred"
+        
+        redis:
+          cluster_endpoints: ["redis-1:6379", "redis-2:6379", "redis-3:6379"]
+          connection_pool: 50
+          timeout: "5 seconds"
+      
+      message_queues:
+        rabbitmq:
+          exchanges:
+            - name: "notifications"
+              type: "topic"
+            - name: "analytics"
+              type: "fanout"
+          queues:
+            - name: "email_queue"
+              durable: true
+            - name: "push_queue"
+              durable: true
+        
+        kafka:
+          brokers: ["kafka-1:9092", "kafka-2:9092"]
+          topics:
+            - name: "user_events"
+              partitions: 10
+            - name: "system_metrics"
+              partitions: 5
+
+# ====================
+# 5. データ要件
+# ====================
+data_requirements:
+  
+  data_models:
+    
+    user_entity:
+      table_name: "users"
+      storage_requirements: "~1KB per user"
+      growth_rate: "10,000 users/month"
+      retention_period: "Indefinite"
+      
+      attributes:
+        - name: "user_id"
+          type: "UUID"
+          constraints: ["PRIMARY KEY", "NOT NULL"]
+        - name: "email"
+          type: "VARCHAR(255)"
+          constraints: ["UNIQUE", "NOT NULL"]
+        - name: "username"
+          type: "VARCHAR(50)"
+          constraints: ["UNIQUE", "NOT NULL"]
+        - name: "password_hash"
+          type: "VARCHAR(255)"
+          constraints: ["NOT NULL"]
+        - name: "profile_data"
+          type: "JSONB"
+        - name: "created_at"
+          type: "TIMESTAMP"
+        - name: "updated_at"
+          type: "TIMESTAMP"
+      
+      indexes:
+        - columns: ["email"]
+          type: "BTREE"
+        - columns: ["username"]
+          type: "BTREE"
+        - columns: ["created_at"]
+          type: "BTREE"
+    
+    post_entity:
+      table_name: "posts"
+      storage_requirements: "~5KB per post"
+      growth_rate: "100,000 posts/month"
+      retention_period: "1 year"
+      
+      attributes:
+        - name: "post_id"
+          type: "UUID"
+          constraints: ["PRIMARY KEY"]
+        - name: "user_id"
+          type: "UUID"
+          constraints: ["FOREIGN KEY", "NOT NULL"]
+        - name: "content"
+          type: "TEXT"
+        - name: "media_urls"
+          type: "TEXT[]"
+        - name: "location"
+          type: "GEOGRAPHY(POINT, 4326)"
+        - name: "visibility"
+          type: "ENUM"
+        - name: "expires_at"
+          type: "TIMESTAMP"
+        - name: "created_at"
+          type: "TIMESTAMP"
+      
+      indexes:
+        - columns: ["user_id"]
+          type: "BTREE"
+        - columns: ["location"]
+          type: "GIST"
+        - columns: ["created_at", "expires_at"]
+          type: "BTREE"
+      
+      partitioning:
+        strategy: "Range"
+        column: "created_at"
+        interval: "Monthly"
+  
+  data_flow:
+    
+    ingestion:
+      sources:
+        - source: "Mobile App"
+          format: "JSON"
+          volume: "1GB/day"
+          processing: "Real-time"
+        - source: "Web Dashboard"
+          format: "JSON"
+          volume: "100MB/day"
+          processing: "Real-time"
+        - source: "External APIs"
+          format: "Various"
+          volume: "500MB/day"
+          processing: "Batch"
+      
+      pipelines:
+        - name: "User Activity Pipeline"
+          stages: ["Ingestion", "Validation", "Enrichment", "Storage"]
+          throughput: "10,000 events/sec"
+        - name: "Content Pipeline"
+          stages: ["Upload", "Processing", "Moderation", "Distribution"]
+          throughput: "1,000 posts/min"
+    
+    storage:
+      
+      hot_storage:
+        duration: "30 days"
+        technology: "SSD"
+        access_pattern: "Random"
+        size: "10TB"
+      
+      warm_storage:
+        duration: "90 days"
+        technology: "HDD"
+        access_pattern: "Sequential"
+        size: "50TB"
+      
+      cold_storage:
+        duration: "1+ years"
+        technology: "S3 Glacier"
+        access_pattern: "Rare"
+        size: "Unlimited"
+    
+    backup_recovery:
+      
+      backup_strategy:
+        frequency:
+          full_backup: "Weekly"
+          incremental: "Daily"
+          snapshot: "Hourly"
+        
+        retention:
+          daily: "7 days"
+          weekly: "4 weeks"
+          monthly: "12 months"
+        
+        storage_location:
+          primary: "AWS S3"
+          secondary: "Azure Blob Storage"
+      
+      recovery_objectives:
+        rpo: "1 hour"
+        rto: "4 hours"
+        testing_frequency: "Quarterly"
+
+# ====================
+# 6. 制約事項
+# ====================
+constraints:
+  
+  technical_constraints:
+    - constraint: "モバイルアプリサイズ"
+      description: "100MB以下"
+      rationale: "ダウンロード率向上"
+    
+    - constraint: "API応答時間"
+      description: "2秒以内"
+      rationale: "ユーザー体験"
+    
+    - constraint: "データセンター"
+      description: "日本国内"
+      rationale: "レイテンシとコンプライアンス"
+  
+  business_constraints:
+    - constraint: "初期投資"
+      description: "5億円以内"
+      rationale: "予算制限"
+    
+    - constraint: "開発期間"
+      description: "12ヶ月以内"
+      rationale: "市場投入時期"
+    
+    - constraint: "運用コスト"
+      description: "月額2,000万円以内"
+      rationale: "収益性確保"
+  
+  regulatory_constraints:
+    - constraint: "個人情報保護法"
+      description: "完全準拠"
+      requirements:
+        - "同意取得"
+        - "開示請求対応"
+        - "削除要求対応"
+    
+    - constraint: "GDPR"
+      description: "EU市民データ保護"
+      requirements:
+        - "データポータビリティ"
+        - "忘れられる権利"
+        - "明示的同意"
+    
+    - constraint: "電気通信事業法"
+      description: "通信の秘密保護"
+      requirements:
+        - "通信ログ管理"
+        - "不正アクセス防止"
+
+# ====================
+# 7. 品質属性
+# ====================
+quality_attributes:
+  
+  reliability:
+    mtbf: "720 hours"
+    mttr: "1 hour"
+    error_rate: "< 0.1%"
+    data_integrity: "99.999%"
+  
+  maintainability:
+    code_complexity: "Cyclomatic complexity < 10"
+    documentation: "100% API coverage"
+    modularity: "Loose coupling, high cohesion"
+    testability: "Unit test coverage > 80%"
+  
+  portability:
+    platform_independence: "Container-based deployment"
+    data_portability: "Standard formats (JSON, CSV)"
+    vendor_independence: "Open standards"
+  
+  reusability:
+    component_reuse: "> 50%"
+    api_standardization: "RESTful, GraphQL"
+    library_management: "Centralized repository"
+  
+  interoperability:
+    standards_compliance:
+      - "OAuth 2.0"
+      - "OpenAPI 3.0"
+      - "JSON:API"
+    protocol_support:
+      - "HTTP/2"
+      - "WebSocket"
+      - "gRPC"
+
+# ====================
+# 8. システム運用要件
+# ====================
+operational_requirements:
+  
+  deployment:
+    
+    environments:
+      development:
+        purpose: "開発・単体テスト"
+        infrastructure: "Single region"
+        data: "Synthetic"
+        access: "Development team"
+      
+      staging:
+        purpose: "統合テスト・UAT"
+        infrastructure: "Production-like"
+        data: "Anonymized production"
+        access: "QA team, stakeholders"
+      
+      production:
+        purpose: "本番運用"
+        infrastructure: "Multi-region"
+        data: "Live data"
+        access: "Controlled, audited"
+    
+    deployment_process:
+      strategy: "Blue-Green Deployment"
+      automation: "CI/CD Pipeline"
+      rollback: "Automatic on failure"
+      validation:
+        - "Smoke tests"
+        - "Health checks"
+        - "Performance tests"
+  
+  monitoring:
+    
+    application_monitoring:
+      tools: ["DataDog", "New Relic"]
+      metrics:
+        - "Request rate"
+        - "Error rate"
+        - "Response time"
+        - "Saturation"
+      
+      alerts:
+        - condition: "Error rate > 1%"
+          severity: "Warning"
+          action: "Email notification"
+        
+        - condition: "Response time > 2s"
+          severity: "Critical"
+          action: "Page on-call"
+    
+    infrastructure_monitoring:
+      tools: ["Prometheus", "Grafana"]
+      metrics:
+        - "CPU utilization"
+        - "Memory usage"
+        - "Disk I/O"
+        - "Network throughput"
+      
+      alerts:
+        - condition: "CPU > 80%"
+          severity: "Warning"
+          action: "Auto-scale"
+        
+        - condition: "Disk > 90%"
+          severity: "Critical"
+          action: "Emergency cleanup"
+    
+    business_monitoring:
+      tools: ["Custom Dashboard"]
+      metrics:
+        - "Active users"
+        - "Post creation rate"
+        - "Revenue"
+        - "Conversion rate"
+  
+  maintenance:
+    
+    scheduled_maintenance:
+      window: "Monday 03:00-05:00 JST"
+      frequency: "Monthly"
+      notification: "7 days advance"
+      activities:
+        - "Security patches"
+        - "Database optimization"
+        - "Cache cleanup"
+    
+    emergency_maintenance:
+      authorization: "CTO or delegate"
+      notification: "Immediate"
+      communication:
+        - "In-app notification"
+        - "Status page"
+        - "Social media"
+    
+    capacity_planning:
+      review_frequency: "Quarterly"
+      growth_projection: "20% monthly"
+      scaling_triggers:
+        - "Storage > 80%"
+        - "Traffic growth > 30%"
+        - "New feature launch"
+
+# ====================
+# 9. 移行要件
+# ====================
+migration_requirements:
+  
+  data_migration:
+    scope: "New system - no legacy data"
+    
+    external_data_import:
+      sources:
+        - source: "Google Places"
+          data_type: "POI data"
+          volume: "~1M records"
+          method: "API batch import"
+        
+        - source: "Event databases"
+          data_type: "Event information"
+          volume: "~10K records/month"
+          method: "Scheduled sync"
+    
+    data_validation:
+      - "Schema validation"
+      - "Referential integrity"
+      - "Duplicate detection"
+      - "Data quality checks"
+  
+  user_migration:
+    
+    onboarding_phases:
+      alpha:
+        users: 100
+        method: "Direct invitation"
+        support: "Dedicated support"
+      
+      beta:
+        users: 5000
+        method: "Application process"
+        support: "Community forum"
+      
+      general_availability:
+        users: "Unlimited"
+        method: "App store release"
+        support: "Self-service + tickets"
+    
+    training_requirements:
+      end_users:
+        - "In-app tutorial"
+        - "Video guides"
+        - "FAQ section"
+      
+      administrators:
+        - "Training sessions"
+        - "Documentation"
+        - "Sandbox environment"
+      
+      partners:
+        - "API documentation"
+        - "Integration guides"
+        - "Technical support"
+
+# ====================
+# 10. 依存関係
+# ====================
+dependencies:
+  
+  external_services:
+    - service: "AWS"
+      criticality: "Critical"
+      contingency: "Multi-cloud strategy"
+      sla: "99.99%"
+    
+    - service: "Mapbox"
+      criticality: "High"
+      contingency: "Google Maps fallback"
+      sla: "99.9%"
+    
+    - service: "DeepL"
+      criticality: "Medium"
+      contingency: "Google Translate"
+      sla: "99.5%"
+    
+    - service: "Stripe"
+      criticality: "High"
+      contingency: "PayPal integration"
+      sla: "99.99%"
+  
+  internal_dependencies:
+    - component: "Authentication Service"
+      dependent_services: ["All services"]
+      impact: "System-wide outage"
+      mitigation: "Redundancy, caching"
+    
+    - component: "Database"
+      dependent_services: ["All services"]
+      impact: "Data unavailability"
+      mitigation: "Replication, failover"
+    
+    - component: "Message Queue"
+      dependent_services: ["Notification", "Analytics"]
+      impact: "Delayed processing"
+      mitigation: "Queue persistence"
+  
+  technology_dependencies:
+    - technology: "Node.js 20.x"
+      components: ["User Service", "Notification Service"]
+      update_policy: "Quarterly"
+    
+    - technology: "Python 3.11"
+      components: ["Analytics Service", "Quest Service"]
+      update_policy: "Semi-annual"
+    
+    - technology: "PostgreSQL 15"
+      components: ["Primary Database"]
+      update_policy: "Annual"
+
+# ====================
+# 11. 承認と合意
+# ====================
+approval_agreement:
+  
+  stakeholder_approval:
+    - role: "Project Sponsor"
+      name: "[Name]"
+      date: "2025-08-22"
+      signature: "[Digital Signature]"
+    
+    - role: "Technical Lead"
+      name: "[Name]"
+      date: "2025-08-22"
+      signature: "[Digital Signature]"
+    
+    - role: "Business Owner"
+      name: "[Name]"
+      date: "2025-08-22"
+      signature: "[Digital Signature]"
+  
+  review_history:
+    - version: "0.1"
+      date: "2025-08-15"
+      reviewer: "Technical Team"
+      status: "Draft"
+    
+    - version: "0.5"
+      date: "2025-08-19"
+      reviewer: "Architecture Board"
+      status: "Under Review"
+    
+    - version: "1.0"
+      date: "2025-08-22"
+      reviewer: "Steering Committee"
+      status: "Approved"
+  
+  change_log:
+    - date: "2025-08-20"
+      change: "Added multi-region support"
+      approved_by: "CTO"
+    
+    - date: "2025-08-21"
+      change: "Updated performance requirements"
+      approved_by: "Technical Lead"
+    
+    - date: "2025-08-22"
+      change: "Final review and approval"
+      approved_by: "Steering Committee"
+
+# ====================
+# END OF SYSTEM REQUIREMENTS SPECIFICATION
+# ====================

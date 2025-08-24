@@ -1,0 +1,1763 @@
+# 機能要求仕様書（FRS: Functional Requirements Specification）
+# ============================================
+# プロジェクト: Shibuya Live Canvas  
+# ドキュメントID: FRS-SLC-001
+# バージョン: 1.0.0
+# 作成日: 2025-08-22
+# ステータス: 承認済み
+
+# ====================
+# 1. ドキュメント概要
+# ====================
+document_overview:
+  purpose: |
+    本ドキュメントは、Shibuya Live Canvasシステムの全機能要求を
+    詳細に定義し、開発チームが実装すべき機能の完全な仕様を提供する。
+  
+  scope:
+    included:
+      - "ユーザー向け機能"
+      - "管理者向け機能"
+      - "システム間連携機能"
+      - "データ処理機能"
+    excluded:
+      - "非機能要求（パフォーマンス、セキュリティ等）"
+      - "インフラストラクチャ要件"
+      - "運用手順"
+  
+  audience:
+    - "開発チーム"
+    - "QAチーム"
+    - "プロダクトマネージャー"
+    - "ステークホルダー"
+  
+  references:
+    - document: "ビジネス要求仕様書"
+      id: "BRS-SLC-001"
+    - document: "システム要求仕様書"
+      id: "SRS-SLC-001"
+
+# ====================
+# 2. ユーザー管理機能
+# ====================
+user_management_features:
+  
+  user_registration:
+    id: "FRS-UM-001"
+    priority: "必須"
+    description: "新規ユーザー登録機能"
+    
+    functional_details:
+      
+      registration_methods:
+        email_registration:
+          process:
+            1: "メールアドレス入力"
+            2: "パスワード設定（8文字以上、英数字混在）"
+            3: "利用規約同意"
+            4: "確認メール送信"
+            5: "メールリンククリックで認証"
+            6: "プロフィール初期設定"
+          validations:
+            - "メールアドレス形式チェック"
+            - "メールアドレス重複チェック"
+            - "パスワード強度チェック"
+          error_handling:
+            - code: "UM001"
+              message: "既に登録済みのメールアドレスです"
+            - code: "UM002"
+              message: "パスワードが要件を満たしていません"
+        
+        social_registration:
+          providers:
+            - provider: "Google"
+              scope: ["email", "profile"]
+            - provider: "Apple"
+              scope: ["email", "name"]
+            - provider: "LINE"
+              scope: ["profile", "openid"]
+          process:
+            1: "プロバイダー選択"
+            2: "OAuth認証"
+            3: "権限許可"
+            4: "アカウント連携"
+            5: "追加情報入力"
+          data_mapping:
+            email: "provider.email"
+            name: "provider.displayName"
+            avatar: "provider.photoURL"
+      
+      profile_setup:
+        required_fields:
+          - field: "username"
+            type: "string"
+            validation: "3-20文字、英数字とアンダースコア"
+            unique: true
+          - field: "display_name"
+            type: "string"
+            validation: "1-50文字"
+          - field: "language"
+            type: "enum"
+            options: ["ja", "en", "zh", "ko"]
+        
+        optional_fields:
+          - field: "bio"
+            type: "text"
+            validation: "最大160文字"
+          - field: "avatar"
+            type: "file"
+            validation: "JPG/PNG、最大5MB"
+          - field: "location_privacy"
+            type: "enum"
+            options: ["public", "friends", "private"]
+            default: "friends"
+    
+    business_rules:
+      - rule: "年齢制限"
+        condition: "13歳未満は登録不可"
+        implementation: "生年月日入力と検証"
+      - rule: "地域制限"
+        condition: "サービス提供地域のみ"
+        implementation: "IPアドレスによる地域判定"
+  
+  authentication:
+    id: "FRS-UM-002"
+    priority: "必須"
+    description: "ユーザー認証機能"
+    
+    functional_details:
+      
+      login_process:
+        standard_login:
+          input_fields:
+            - field: "email_or_username"
+              type: "string"
+              required: true
+            - field: "password"
+              type: "password"
+              required: true
+            - field: "remember_me"
+              type: "boolean"
+              default: false
+          
+          process_flow:
+            1: "認証情報入力"
+            2: "入力検証"
+            3: "認証処理"
+            4: "セッション生成"
+            5: "トークン発行"
+            6: "ログイン成功/失敗処理"
+          
+          security_measures:
+            - "ブルートフォース対策（5回失敗で一時ロック）"
+            - "CAPTCHA（3回失敗後）"
+            - "ログイン通知メール"
+        
+        biometric_login:
+          supported_methods:
+            - method: "Face ID"
+              platform: "iOS"
+              fallback: "Passcode"
+            - method: "Touch ID"
+              platform: "iOS"
+              fallback: "Passcode"
+            - method: "Fingerprint"
+              platform: "Android"
+              fallback: "PIN/Pattern"
+          
+          process:
+            1: "生体認証プロンプト表示"
+            2: "認証実行"
+            3: "ローカルキーチェーンからトークン取得"
+            4: "サーバー認証"
+            5: "セッション確立"
+      
+      session_management:
+        token_specification:
+          type: "JWT"
+          algorithm: "RS256"
+          expiration:
+            access_token: "1 hour"
+            refresh_token: "7 days"
+          claims:
+            - "user_id"
+            - "email"
+            - "roles"
+            - "issued_at"
+            - "expires_at"
+        
+        refresh_mechanism:
+          trigger: "Access token expiration"
+          process:
+            1: "Refresh token validation"
+            2: "User status check"
+            3: "New access token generation"
+            4: "Optional refresh token rotation"
+        
+        logout_process:
+          client_side:
+            - "Clear local storage"
+            - "Clear session storage"
+            - "Remove cookies"
+          server_side:
+            - "Invalidate tokens"
+            - "Clear session cache"
+            - "Log logout event"
+  
+  profile_management:
+    id: "FRS-UM-003"
+    priority: "高"
+    description: "プロフィール管理機能"
+    
+    functional_details:
+      
+      profile_viewing:
+        own_profile:
+          accessible_data:
+            - "全個人情報"
+            - "プライバシー設定"
+            - "アクティビティ履歴"
+            - "統計情報"
+        
+        other_profiles:
+          accessible_data:
+            public: ["display_name", "bio", "public_posts", "badges"]
+            friends: ["location", "recent_activity", "contact_info"]
+            blocked: []
+      
+      profile_editing:
+        editable_fields:
+          - field: "display_name"
+            validation: "1-50文字"
+            rate_limit: "1回/日"
+          - field: "bio"
+            validation: "最大160文字"
+            rate_limit: "無制限"
+          - field: "avatar"
+            validation: "JPG/PNG、最大5MB"
+            processing: "リサイズ、最適化"
+          - field: "language"
+            immediate_effect: true
+          - field: "notification_settings"
+            granular_control: true
+        
+        verification_badge:
+          eligibility:
+            - "アカウント作成から30日以上"
+            - "投稿数50以上"
+            - "違反履歴なし"
+          process:
+            - "申請フォーム提出"
+            - "身分証明書アップロード"
+            - "審査（48時間以内）"
+            - "承認/却下通知"
+      
+      privacy_settings:
+        profile_visibility:
+          options:
+            - level: "public"
+              description: "誰でも閲覧可能"
+            - level: "friends"
+              description: "フォロワーのみ"
+            - level: "private"
+              description: "自分のみ"
+        
+        data_sharing:
+          - setting: "location_sharing"
+            options: ["exact", "approximate", "city_only", "hidden"]
+          - setting: "activity_tracking"
+            options: ["enabled", "disabled"]
+          - setting: "analytics_participation"
+            options: ["full", "anonymous", "opt_out"]
+
+# ====================
+# 3. コンテンツ管理機能
+# ====================
+content_management_features:
+  
+  post_creation:
+    id: "FRS-CM-001"
+    priority: "必須"
+    description: "投稿作成機能"
+    
+    functional_details:
+      
+      content_types:
+        text_post:
+          specifications:
+            max_length: 280
+            encoding: "UTF-8"
+            emoji_support: true
+            hashtag_support: true
+            mention_support: true
+          
+          formatting:
+            - "改行保持"
+            - "URLリンク化"
+            - "ハッシュタグハイライト"
+            - "メンション通知連携"
+        
+        media_post:
+          photo:
+            formats: ["JPEG", "PNG", "WebP", "HEIF"]
+            max_size: "10MB per file"
+            max_count: 4
+            processing:
+              - "自動リサイズ（最大2048px）"
+              - "EXIF情報削除"
+              - "顔認識ぼかしオプション"
+              - "WebP変換"
+          
+          video:
+            formats: ["MP4", "MOV", "WebM"]
+            max_size: "100MB"
+            max_duration: "60 seconds"
+            processing:
+              - "自動圧縮"
+              - "サムネイル生成"
+              - "HLS変換"
+              - "音声レベル正規化"
+        
+        location_tagging:
+          methods:
+            gps_auto:
+              accuracy: "10m"
+              fallback: "Network location"
+            manual_selection:
+              search: "Place name or address"
+              map_pin: "Drag and drop"
+            venue_selection:
+              source: "Foursquare/Google Places"
+              categories: ["Restaurant", "Shop", "Event", "Landmark"]
+      
+      post_workflow:
+        draft_management:
+          auto_save:
+            interval: "10 seconds"
+            storage: "Local + Cloud"
+          draft_limit: 10
+          expiration: "7 days"
+        
+        publishing_options:
+          visibility:
+            - option: "public"
+              description: "全ユーザーに公開"
+            - option: "followers"
+              description: "フォロワーのみ"
+            - option: "custom"
+              description: "特定グループ"
+          
+          scheduling:
+            enabled: true
+            max_future: "7 days"
+            timezone: "User local"
+          
+          expiration:
+            default: "24 hours"
+            options: ["1h", "6h", "12h", "24h", "3d", "7d", "permanent"]
+            fade_effect: true
+        
+        content_moderation:
+          pre_publish:
+            - check: "Inappropriate content"
+              method: "AI scanning"
+              action: "Block or warn"
+            - check: "Spam detection"
+              method: "Pattern matching"
+              action: "Rate limit"
+          
+          post_publish:
+            - check: "User reports"
+              threshold: 3
+              action: "Review queue"
+            - check: "Automated monitoring"
+              frequency: "Continuous"
+              action: "Flag for review"
+  
+  content_discovery:
+    id: "FRS-CM-002"
+    priority: "必須"
+    description: "コンテンツ発見機能"
+    
+    functional_details:
+      
+      map_view:
+        display_options:
+          zoom_levels:
+            min: 10
+            max: 20
+            default: 15
+          
+          post_clustering:
+            enabled: true
+            threshold: "50 posts in viewport"
+            display: "Number badge"
+          
+          time_filter:
+            slider_range: "-24h to +24h"
+            granularity: "1 hour"
+            animation: "Fade in/out"
+        
+        post_visualization:
+          markers:
+            types:
+              - type: "standard"
+                icon: "default pin"
+                color: "category based"
+              - type: "trending"
+                icon: "fire emoji"
+                animation: "pulse"
+              - type: "quest"
+                icon: "star"
+                color: "gold"
+          
+          preview_card:
+            trigger: "Tap marker"
+            content:
+              - "User avatar"
+              - "Username"
+              - "Post preview (50 chars)"
+              - "Time ago"
+              - "Engagement stats"
+          
+          detail_view:
+            trigger: "Tap preview card"
+            transition: "Slide up modal"
+            content: "Full post details"
+      
+      feed_view:
+        algorithms:
+          chronological:
+            description: "時系列順"
+            sort: "created_at DESC"
+          
+          nearby:
+            description: "近い順"
+            parameters:
+              radius: "1km default"
+              adjustable: true
+            sort: "distance ASC, created_at DESC"
+          
+          trending:
+            description: "トレンド"
+            factors:
+              - "Engagement rate"
+              - "Velocity"
+              - "Recency"
+            weight_calculation: "ML model"
+          
+          personalized:
+            description: "おすすめ"
+            factors:
+              - "User interests"
+              - "Interaction history"
+              - "Social graph"
+              - "Location patterns"
+        
+        infinite_scroll:
+          batch_size: 20
+          preload_threshold: "80% scrolled"
+          loading_indicator: "Skeleton screens"
+      
+      search_functionality:
+        search_types:
+          text_search:
+            fields: ["content", "hashtags", "location_name"]
+            operators: ["AND", "OR", "NOT", "phrase"]
+            fuzzy_matching: true
+          
+          user_search:
+            fields: ["username", "display_name", "bio"]
+            filters: ["verified", "following", "nearby"]
+          
+          location_search:
+            methods: ["Name", "Address", "Coordinates"]
+            radius_filter: "100m to 50km"
+          
+          hashtag_search:
+            autocomplete: true
+            trending_display: true
+            related_suggestions: true
+        
+        filters:
+          - filter: "Date range"
+            type: "date_picker"
+          - filter: "Media type"
+            options: ["Photos", "Videos", "Text only"]
+          - filter: "Language"
+            options: ["ja", "en", "zh", "ko", "All"]
+          - filter: "Verified users"
+            type: "toggle"
+        
+        search_results:
+          display: "Mixed content grid"
+          sorting: ["Relevance", "Recent", "Popular"]
+          pagination: "Load more button"
+  
+  engagement_features:
+    id: "FRS-CM-003"
+    priority: "高"
+    description: "エンゲージメント機能"
+    
+    functional_details:
+      
+      reactions:
+        like_system:
+          types:
+            - emoji: "❤️"
+              name: "like"
+              animation: "heart burst"
+            - emoji: "🔥"
+              name: "fire"
+              animation: "flame effect"
+            - emoji: "😊"
+              name: "smile"
+              animation: "bounce"
+            - emoji: "😮"
+              name: "wow"
+              animation: "expand"
+          
+          behavior:
+            - "Single reaction per user per post"
+            - "Changeable reaction"
+            - "Real-time count update"
+            - "Notification to post owner"
+        
+        comment_system:
+          specifications:
+            max_length: 200
+            threading: "Single level replies"
+            max_replies: 100
+            mentions: true
+            emoji: true
+          
+          moderation:
+            - "Spam filter"
+            - "Profanity filter"
+            - "User blocking respected"
+            - "Report option"
+          
+          display:
+            default_view: "Top 3 comments"
+            expand_action: "View all comments"
+            sort_options: ["Newest", "Top", "Oldest"]
+        
+        sharing:
+          internal_share:
+            method: "Repost with comment"
+            visibility: "Inherits original or more restrictive"
+          
+          external_share:
+            platforms:
+              - "Twitter/X"
+              - "LINE"
+              - "Instagram Stories"
+              - "Copy link"
+            link_preview:
+              - "Post preview image"
+              - "Title and description"
+              - "Deep link to app"
+      
+      social_graph:
+        follow_system:
+          types:
+            - type: "Follow"
+              description: "一方向フォロー"
+              privacy: "Public action"
+            - type: "Friend"
+              description: "相互フォロー"
+              badge: "Friend indicator"
+          
+          limits:
+            max_following: 5000
+            max_followers: "Unlimited"
+            rate_limit: "100 follows/hour"
+          
+          notifications:
+            - "New follower"
+            - "Follow request (private accounts)"
+            - "Friend status achieved"
+        
+        user_lists:
+          creation:
+            max_lists: 20
+            max_members: 500
+            privacy: ["Public", "Private"]
+          
+          management:
+            - "Add/remove members"
+            - "Rename list"
+            - "Change privacy"
+            - "Delete list"
+          
+          usage:
+            - "Filter feed by list"
+            - "Bulk mention list members"
+            - "Share list"
+
+# ====================
+# 4. 位置情報機能
+# ====================
+location_features:
+  
+  location_tracking:
+    id: "FRS-LF-001"
+    priority: "必須"
+    description: "位置情報トラッキング機能"
+    
+    functional_details:
+      
+      location_acquisition:
+        methods:
+          gps:
+            priority: 1
+            accuracy: "5-10m"
+            power_mode: "High accuracy"
+            update_frequency: "1Hz when active"
+          
+          network:
+            priority: 2
+            accuracy: "20-50m"
+            sources: ["WiFi", "Cell tower"]
+            fallback: true
+          
+          bluetooth_beacons:
+            priority: 3
+            accuracy: "1-3m"
+            indoor_support: true
+            beacon_protocols: ["iBeacon", "Eddystone"]
+        
+        permission_handling:
+          initial_request:
+            timing: "After onboarding"
+            explanation: "位置情報の利用目的説明"
+            options: ["Always", "While using", "Never"]
+          
+          fallback_behavior:
+            denied: "Manual location selection"
+            unavailable: "Last known location"
+        
+        battery_optimization:
+          modes:
+            - mode: "High accuracy"
+              battery_impact: "High"
+              use_case: "Active posting"
+            - mode: "Balanced"
+              battery_impact: "Medium"
+              use_case: "Background tracking"
+            - mode: "Low power"
+              battery_impact: "Low"
+              use_case: "Coarse location only"
+      
+      geofencing:
+        fence_types:
+          circular:
+            min_radius: "50m"
+            max_radius: "10km"
+            max_fences: 100
+          
+          polygon:
+            max_vertices: 20
+            max_fences: 20
+          
+          venue_based:
+            source: "Google Places"
+            auto_boundary: true
+        
+        triggers:
+          - event: "Enter"
+            actions: ["Notification", "Quest activation", "Content unlock"]
+          - event: "Exit"
+            actions: ["Log event", "End quest", "Clear cache"]
+          - event: "Dwell"
+            min_time: "5 minutes"
+            actions: ["Bonus points", "Special content"]
+        
+        management:
+          creation:
+            methods: ["Draw on map", "Enter coordinates", "Select venue"]
+            validation: "No overlapping fences"
+          
+          monitoring:
+            active_limit: 20
+            priority_queue: true
+            update_frequency: "30 seconds"
+  
+  map_interactions:
+    id: "FRS-LF-002"
+    priority: "必須"
+    description: "地図インタラクション機能"
+    
+    functional_details:
+      
+      map_controls:
+        navigation:
+          gestures:
+            - gesture: "Pinch"
+              action: "Zoom in/out"
+              sensitivity: "Configurable"
+            - gesture: "Pan"
+              action: "Move map"
+              momentum: true
+            - gesture: "Double tap"
+              action: "Zoom in one level"
+            - gesture: "Two finger tap"
+              action: "Zoom out one level"
+            - gesture: "Rotate"
+              action: "Rotate map"
+              snap_to_north: true
+          
+          controls:
+            - control: "Zoom buttons"
+              position: "Bottom right"
+              visibility: "Auto-hide"
+            - control: "Compass"
+              position: "Top right"
+              action: "Reset rotation"
+            - control: "Location button"
+              position: "Bottom right"
+              action: "Center on user"
+        
+        layer_management:
+          available_layers:
+            - layer: "Posts"
+              toggleable: true
+              default: true
+            - layer: "Events"
+              toggleable: true
+              default: true
+            - layer: "Quests"
+              toggleable: true
+              default: false
+            - layer: "Heatmap"
+              toggleable: true
+              default: false
+            - layer: "Transit"
+              toggleable: true
+              default: false
+          
+          layer_controls:
+            position: "Top right"
+            style: "Expandable menu"
+            persistence: "Save preferences"
+        
+        map_styles:
+          themes:
+            - name: "Light"
+              default_for: "Daytime"
+            - name: "Dark"
+              default_for: "Nighttime"
+            - name: "Satellite"
+              toggle_option: true
+            - name: "Terrain"
+              toggle_option: true
+          
+          auto_switch:
+            based_on: "Time of day"
+            override: "Manual selection"
+      
+      location_services:
+        place_details:
+          data_source: "Google Places + Custom DB"
+          displayed_info:
+            - "Place name"
+            - "Category"
+            - "Operating hours"
+            - "Contact info"
+            - "Photos"
+            - "Recent posts"
+            - "Active quests"
+          
+          actions:
+            - "Create post here"
+            - "Save place"
+            - "Get directions"
+            - "Share location"
+        
+        directions:
+          providers:
+            - provider: "Google Maps"
+              modes: ["Walking", "Transit", "Driving"]
+            - provider: "Apple Maps"
+              platform: "iOS only"
+          
+          integration:
+            display: "In-app preview"
+            handoff: "Open in native app"
+            
+        nearby_search:
+          categories:
+            - "Food & Drink"
+            - "Shopping"
+            - "Entertainment"
+            - "Services"
+            - "Transportation"
+          
+          filters:
+            - "Open now"
+            - "Distance"
+            - "Rating"
+            - "Price range"
+          
+          results_display:
+            view_modes: ["List", "Map pins"]
+            sort_options: ["Distance", "Popularity", "Recent"]
+
+# ====================
+# 5. ゲーミフィケーション機能
+# ====================
+gamification_features:
+  
+  quest_system:
+    id: "FRS-GM-001"
+    priority: "高"
+    description: "クエストシステム"
+    
+    functional_details:
+      
+      quest_types:
+        location_quest:
+          description: "特定の場所を訪問"
+          requirements:
+            - "指定エリアに入る"
+            - "滞在時間条件を満たす"
+            - "証拠写真を投稿"
+          rewards:
+            points: "50-200"
+            badges: "Location Explorer"
+          
+          verification:
+            method: "GPS + Photo metadata"
+            accuracy_required: "20m"
+        
+        photo_quest:
+          description: "写真撮影チャレンジ"
+          requirements:
+            - "指定被写体を撮影"
+            - "特定の構図条件"
+            - "時間帯制限"
+          rewards:
+            points: "100-300"
+            badges: "Photographer"
+          
+          verification:
+            method: "AI image recognition"
+            confidence_threshold: 0.8
+        
+        social_quest:
+          description: "ソーシャル活動"
+          requirements:
+            - "新規ユーザーをフォロー"
+            - "投稿にコメント"
+            - "コンテンツをシェア"
+          rewards:
+            points: "30-100"
+            badges: "Social Butterfly"
+          
+          anti_spam:
+            - "Rate limiting"
+            - "Quality checks"
+            - "Unique user requirement"
+        
+        survey_quest:
+          description: "アンケート回答"
+          requirements:
+            - "全質問に回答"
+            - "位置確認（必要時）"
+            - "写真添付（任意）"
+          rewards:
+            points: "150-500"
+            vouchers: "Possible"
+          
+          data_usage:
+            - "Anonymous aggregation"
+            - "Municipality reports"
+            - "Business insights"
+      
+      quest_management:
+        discovery:
+          views:
+            - view: "Map view"
+              display: "Quest pins on map"
+            - view: "List view"
+              sort: ["Distance", "Reward", "Difficulty", "Deadline"]
+            - view: "Category view"
+              categories: ["Daily", "Weekly", "Special", "Partner"]
+          
+          filters:
+            - "Available now"
+            - "Reward type"
+            - "Difficulty level"
+            - "Time required"
+        
+        participation:
+          enrollment:
+            limit: "10 active quests"
+            auto_accept: "Optional"
+            prerequisites: "Level/badge requirements"
+          
+          progress_tracking:
+            display: "Progress bar"
+            notifications: ["25%", "50%", "75%", "Complete"]
+            partial_credit: true
+          
+          completion:
+            verification: "Automatic or manual review"
+            reward_distribution: "Immediate"
+            certificate: "Downloadable"
+        
+        quest_creation:
+          creators: ["System", "Businesses", "Municipality"]
+          approval_process:
+            - "Content review"
+            - "Reward validation"
+            - "Legal compliance"
+          
+          templates:
+            - "Store visit"
+            - "Event participation"
+            - "Community feedback"
+            - "Tourism promotion"
+  
+  reward_system:
+    id: "FRS-GM-002"
+    priority: "中"
+    description: "報酬システム"
+    
+    functional_details:
+      
+      point_system:
+        earning_methods:
+          - action: "Post creation"
+            points: "10"
+            daily_limit: 100
+          - action: "Receive like"
+            points: "1"
+            daily_limit: 50
+          - action: "Quest completion"
+            points: "Variable"
+            daily_limit: "None"
+          - action: "Daily login"
+            points: "5"
+            streak_bonus: true
+        
+        point_types:
+          experience_points:
+            purpose: "Level progression"
+            expiration: "Never"
+            transferable: false
+          
+          reward_points:
+            purpose: "Redemption"
+            expiration: "1 year"
+            transferable: false
+          
+          event_points:
+            purpose: "Special campaigns"
+            expiration: "Event specific"
+            transferable: false
+        
+        redemption_options:
+          digital_rewards:
+            - type: "Premium features"
+              cost: "1000 points/month"
+            - type: "Ad removal"
+              cost: "500 points/month"
+            - type: "Extra storage"
+              cost: "2000 points"
+          
+          physical_rewards:
+            - type: "Store vouchers"
+              cost: "Variable"
+              partners: ["Cafes", "Restaurants", "Shops"]
+            - type: "Event tickets"
+              cost: "Variable"
+              availability: "Limited"
+          
+          donations:
+            - type: "Charity"
+              conversion: "1 point = 1 yen"
+              organizations: ["Red Cross", "UNICEF", "Local NPOs"]
+      
+      badge_system:
+        badge_categories:
+          exploration:
+            badges:
+              - name: "First Steps"
+                requirement: "Visit 5 locations"
+                tier: "Bronze"
+              - name: "Explorer"
+                requirement: "Visit 50 locations"
+                tier: "Silver"
+              - name: "World Traveler"
+                requirement: "Visit 500 locations"
+                tier: "Gold"
+          
+          social:
+            badges:
+              - name: "Friendly"
+                requirement: "10 followers"
+                tier: "Bronze"
+              - name: "Popular"
+                requirement: "100 followers"
+                tier: "Silver"
+              - name: "Influencer"
+                requirement: "1000 followers"
+                tier: "Gold"
+          
+          contribution:
+            badges:
+              - name: "Helper"
+                requirement: "Complete 10 survey quests"
+                tier: "Bronze"
+              - name: "Contributor"
+                requirement: "Complete 50 survey quests"
+                tier: "Silver"
+              - name: "City Champion"
+                requirement: "Complete 200 survey quests"
+                tier: "Gold"
+        
+        badge_display:
+          profile_showcase:
+            max_displayed: 5
+            user_selectable: true
+            rarity_indicator: true
+          
+          post_badge:
+            auto_display: "Highest tier"
+            toggleable: true
+        
+        special_badges:
+          limited_edition:
+            - "Event participant"
+            - "Beta tester"
+            - "Anniversary member"
+          
+          verified_badges:
+            - "Official account"
+            - "Local business"
+            - "Content creator"
+      
+      leaderboards:
+        types:
+          global:
+            scope: "All users"
+            metrics: ["Total points", "Level", "Quests completed"]
+            reset: "Never"
+          
+          local:
+            scope: "City/District"
+            metrics: ["Weekly points", "Posts", "Engagement"]
+            reset: "Weekly"
+          
+          friends:
+            scope: "Following only"
+            metrics: ["Daily points", "Streaks", "Badges"]
+            reset: "Daily"
+        
+        display:
+          rankings:
+            show_top: 100
+            user_position: "Always visible"
+            movement_indicators: true
+          
+          rewards:
+            top_3: "Special badges"
+            top_10: "Bonus points"
+            top_100: "Recognition"
+        
+        privacy:
+          opt_out: true
+          anonymous_mode: true
+          hide_stats: "Selective"
+
+# ====================
+# 6. 多言語対応機能
+# ====================
+multilingual_features:
+  
+  language_support:
+    id: "FRS-ML-001"
+    priority: "必須"
+    description: "多言語サポート機能"
+    
+    functional_details:
+      
+      supported_languages:
+        primary:
+          - code: "ja"
+            name: "日本語"
+            direction: "ltr"
+            default_for: ["JP"]
+        
+        secondary:
+          - code: "en"
+            name: "English"
+            direction: "ltr"
+            default_for: ["US", "GB", "AU"]
+          
+          - code: "zh-CN"
+            name: "简体中文"
+            direction: "ltr"
+            default_for: ["CN"]
+          
+          - code: "ko"
+            name: "한국어"
+            direction: "ltr"
+            default_for: ["KR"]
+      
+      language_detection:
+        methods:
+          - priority: 1
+            source: "Device language"
+          - priority: 2
+            source: "Location"
+          - priority: 3
+            source: "User selection"
+        
+        fallback: "English"
+        changeable: "Settings menu"
+      
+      ui_localization:
+        coverage: "100% of UI elements"
+        management:
+          system: "i18next"
+          updates: "Over-the-air"
+          fallback: "English strings"
+        
+        considerations:
+          - "Date/time formats"
+          - "Number formats"
+          - "Currency symbols"
+          - "Text direction"
+          - "Font selection"
+  
+  translation_features:
+    id: "FRS-ML-002"
+    priority: "必須"
+    description: "翻訳機能"
+    
+    functional_details:
+      
+      automatic_translation:
+        provider:
+          primary: "DeepL API"
+          fallback: "Google Translate"
+          
+        supported_content:
+          - "Post text"
+          - "Comments"
+          - "User bios"
+          - "Quest descriptions"
+        
+        translation_flow:
+          1: "Detect source language"
+          2: "Check cache for existing translation"
+          3: "Request translation if not cached"
+          4: "Store translation in cache"
+          5: "Display with indicator"
+        
+        quality_assurance:
+          confidence_threshold: 0.8
+          human_review: "Flagged content"
+          feedback_mechanism: "Report poor translation"
+      
+      translation_display:
+        indicators:
+          - icon: "Globe icon"
+            meaning: "Translated content"
+          - text: "Translated from [language]"
+            position: "Below content"
+        
+        toggle:
+          action: "Tap to switch"
+          options: ["Original", "Translated"]
+          preference: "Remember choice"
+        
+        limitations:
+          - "Images with text: Not translated"
+          - "Video subtitles: Not available"
+          - "Audio: Not translated"
+      
+      translation_management:
+        caching:
+          storage: "Database + CDN"
+          ttl: "30 days"
+          invalidation: "On content edit"
+        
+        rate_limiting:
+          per_user: "1000 translations/day"
+          per_app: "5M characters/month"
+          handling: "Queue or defer"
+        
+        costs:
+          monitoring: "Daily usage reports"
+          optimization: "Batch requests"
+          budgeting: "Monthly limits"
+
+# ====================
+# 7. 通知機能
+# ====================
+notification_features:
+  
+  notification_system:
+    id: "FRS-NF-001"
+    priority: "必須"
+    description: "通知システム"
+    
+    functional_details:
+      
+      notification_types:
+        social_notifications:
+          - type: "new_follower"
+            trigger: "User follows"
+            content: "[User] started following you"
+            action: "Open profile"
+          
+          - type: "like_received"
+            trigger: "Post liked"
+            content: "[User] liked your post"
+            action: "Open post"
+            grouping: true
+          
+          - type: "comment_received"
+            trigger: "Comment posted"
+            content: "[User] commented: [preview]"
+            action: "Open post"
+          
+          - type: "mention"
+            trigger: "@mention in post/comment"
+            content: "[User] mentioned you"
+            action: "Open content"
+            priority: "high"
+        
+        location_notifications:
+          - type: "nearby_activity"
+            trigger: "Posts within radius"
+            content: "New activity near you"
+            action: "Open map"
+            frequency_cap: "1/hour"
+          
+          - type: "entered_zone"
+            trigger: "Geofence entry"
+            content: "Welcome to [Zone]"
+            action: "Show local content"
+          
+          - type: "friend_nearby"
+            trigger: "Friend within 500m"
+            content: "[Friend] is nearby"
+            action: "View on map"
+            privacy_controlled: true
+        
+        quest_notifications:
+          - type: "quest_available"
+            trigger: "New quest in area"
+            content: "New quest available!"
+            action: "View quest"
+          
+          - type: "quest_reminder"
+            trigger: "Quest deadline approaching"
+            content: "Quest expires in [time]"
+            action: "Open quest"
+          
+          - type: "quest_completed"
+            trigger: "Quest verification passed"
+            content: "Quest completed! +[points]"
+            action: "View rewards"
+        
+        system_notifications:
+          - type: "app_update"
+            trigger: "New version available"
+            content: "Update available"
+            action: "Open app store"
+          
+          - type: "maintenance"
+            trigger: "Scheduled maintenance"
+            content: "Maintenance at [time]"
+            action: "View details"
+          
+          - type: "security_alert"
+            trigger: "Suspicious activity"
+            content: "New login detected"
+            action: "Review activity"
+      
+      delivery_channels:
+        push_notifications:
+          providers:
+            ios: "APNs"
+            android: "FCM"
+          
+          configuration:
+            sound: "Default or custom"
+            badge: "Unread count"
+            priority: ["high", "default", "low"]
+          
+          rich_content:
+            - "Images"
+            - "Action buttons"
+            - "Expandable content"
+        
+        in_app_notifications:
+          display:
+            style: "Banner or modal"
+            duration: "3 seconds or manual dismiss"
+            position: "Top or bottom"
+          
+          inbox:
+            retention: "7 days"
+            max_items: 100
+            mark_as_read: "Automatic or manual"
+        
+        email_notifications:
+          types:
+            - "Daily digest"
+            - "Weekly summary"
+            - "Important only"
+          
+          templates:
+            design: "Responsive HTML"
+            personalization: "User name, preferences"
+            unsubscribe: "One-click"
+      
+      notification_preferences:
+        granular_control:
+          by_type:
+            toggles: "Individual notification types"
+            frequency: ["Instant", "Hourly", "Daily", "Off"]
+          
+          by_channel:
+            push: "On/Off"
+            in_app: "On/Off"
+            email: "On/Off"
+          
+          quiet_hours:
+            enabled: true
+            default: "22:00-08:00"
+            override: "Important notifications"
+        
+        smart_notifications:
+          bundling:
+            similar_types: "Group similar notifications"
+            time_window: "5 minutes"
+          
+          deduplication:
+            prevent: "Duplicate notifications"
+            across_channels: true
+          
+          priority_filtering:
+            ml_based: "Learn user preferences"
+            manual_rules: "User-defined filters"
+
+# ====================
+# 8. 分析・レポート機能
+# ====================
+analytics_reporting_features:
+  
+  user_analytics:
+    id: "FRS-AR-001"
+    priority: "中"
+    description: "ユーザー分析機能"
+    
+    functional_details:
+      
+      personal_analytics:
+        dashboard_metrics:
+          engagement:
+            - metric: "Total posts"
+              period: ["All time", "Monthly", "Weekly"]
+            - metric: "Total likes received"
+              trend: "Show graph"
+            - metric: "Comments received"
+              breakdown: "By post"
+            - metric: "Follower growth"
+              chart: "Line graph"
+          
+          activity:
+            - metric: "Active days"
+              visualization: "Calendar heatmap"
+            - metric: "Post frequency"
+              average: "Posts per day"
+            - metric: "Peak posting times"
+              chart: "Hour distribution"
+            - metric: "Location diversity"
+              map: "Heat map"
+          
+          achievements:
+            - metric: "Quests completed"
+              breakdown: "By type"
+            - metric: "Points earned"
+              leaderboard_rank: true
+            - metric: "Badges collected"
+              showcase: "Recent unlocks"
+        
+        insights:
+          content_performance:
+            - "Best performing posts"
+            - "Optimal posting times"
+            - "Engaging content types"
+            - "Popular locations"
+          
+          audience_insights:
+            - "Follower demographics"
+            - "Follower locations"
+            - "Engagement patterns"
+            - "Growth trends"
+      
+      business_analytics:
+        dashboard_access:
+          tiers:
+            - tier: "Basic"
+              price: "Free"
+              features: ["Basic metrics", "7-day history"]
+            - tier: "Pro"
+              price: "¥10,000/month"
+              features: ["Advanced metrics", "90-day history", "Export"]
+            - tier: "Enterprise"
+              price: "Custom"
+              features: ["Custom metrics", "API access", "White-label"]
+        
+        metrics:
+          foot_traffic:
+            - "Visitor count"
+            - "Dwell time"
+            - "Repeat visitors"
+            - "Peak hours"
+          
+          customer_insights:
+            - "Demographics"
+            - "Interests"
+            - "Visit patterns"
+            - "Sentiment analysis"
+          
+          competitive_analysis:
+            - "Market share"
+            - "Comparative performance"
+            - "Trend analysis"
+            - "Opportunity identification"
+        
+        reports:
+          automated:
+            frequency: ["Daily", "Weekly", "Monthly"]
+            format: ["PDF", "Excel", "PowerPoint"]
+            delivery: ["Email", "Dashboard", "API"]
+          
+          custom:
+            builder: "Drag-and-drop interface"
+            templates: "Industry-specific"
+            sharing: "Stakeholder access"
+  
+  system_analytics:
+    id: "FRS-AR-002"
+    priority: "高"
+    description: "システム分析機能"
+    
+    functional_details:
+      
+      platform_metrics:
+        usage_statistics:
+          - "Daily active users"
+          - "Monthly active users"
+          - "Session duration"
+          - "Page views"
+          - "API calls"
+        
+        content_metrics:
+          - "Posts created"
+          - "Media uploaded"
+          - "Comments posted"
+          - "Translations requested"
+        
+        performance_metrics:
+          - "Response times"
+          - "Error rates"
+          - "Uptime"
+          - "Resource utilization"
+      
+      administrative_reporting:
+        compliance_reports:
+          - "Content moderation stats"
+          - "User reports handled"
+          - "Data requests fulfilled"
+          - "Security incidents"
+        
+        financial_reports:
+          - "Revenue by source"
+          - "User acquisition costs"
+          - "Infrastructure costs"
+          - "ROI analysis"
+        
+        operational_reports:
+          - "Support ticket volume"
+          - "Feature usage"
+          - "A/B test results"
+          - "User feedback summary"
+
+# ====================
+# 9. 管理機能
+# ====================
+admin_features:
+  
+  content_moderation:
+    id: "FRS-AD-001"
+    priority: "必須"
+    description: "コンテンツモデレーション機能"
+    
+    functional_details:
+      
+      automated_moderation:
+        ai_detection:
+          providers:
+            - "AWS Rekognition"
+            - "Google Cloud Vision"
+            - "Custom ML models"
+          
+          detection_types:
+            - "Inappropriate images"
+            - "Hate speech"
+            - "Spam"
+            - "Violence"
+            - "Personal information"
+          
+          actions:
+            high_confidence:
+              threshold: "> 0.9"
+              action: "Auto-remove"
+            
+            medium_confidence:
+              threshold: "0.7-0.9"
+              action: "Flag for review"
+            
+            low_confidence:
+              threshold: "< 0.7"
+              action: "Monitor"
+      
+      manual_moderation:
+        queue_management:
+          priority_levels:
+            - "Critical (legal issues)"
+            - "High (multiple reports)"
+            - "Medium (AI flagged)"
+            - "Low (single report)"
+          
+          assignment:
+            method: "Round-robin or skill-based"
+            sla: "Critical: 1hr, High: 4hr, Medium: 24hr, Low: 48hr"
+        
+        moderation_tools:
+          - "Content preview"
+          - "User history"
+          - "Similar cases"
+          - "Translation tools"
+          - "Legal guidelines"
+        
+        actions:
+          - action: "Approve"
+            result: "Content remains"
+          - action: "Remove"
+            result: "Content deleted, user notified"
+          - action: "Edit"
+            result: "Blur/redact portions"
+          - action: "Restrict"
+            result: "Limit visibility"
+          - action: "Escalate"
+            result: "Senior review"
+      
+      user_management:
+        violation_tracking:
+          strike_system:
+            - strikes: 1
+              action: "Warning"
+            - strikes: 2
+              action: "24hr suspension"
+            - strikes: 3
+              action: "7 day suspension"
+            - strikes: 4
+              action: "Permanent ban"
+          
+          appeal_process:
+            submission: "In-app form"
+            review: "Within 72 hours"
+            decision: "Final or escalate"
+        
+        account_actions:
+          - "View user details"
+          - "Send warning"
+          - "Suspend account"
+          - "Ban account"
+          - "Delete content"
+          - "Reset violations"
+          - "Add notes"
+  
+  system_configuration:
+    id: "FRS-AD-002"
+    priority: "高"
+    description: "システム設定機能"
+    
+    functional_details:
+      
+      feature_flags:
+        management:
+          - "Enable/disable features"
+          - "Gradual rollout"
+          - "A/B testing"
+          - "User segment targeting"
+        
+        configuration:
+          - "Percentage rollout"
+          - "Geographic targeting"
+          - "User attribute targeting"
+          - "Time-based activation"
+      
+      system_parameters:
+        configurable_items:
+          - "Rate limits"
+          - "Cache TTLs"
+          - "Timeout values"
+          - "Batch sizes"
+          - "Queue priorities"
+        
+        validation:
+          - "Type checking"
+          - "Range validation"
+          - "Dependency checking"
+          - "Impact preview"
+      
+      maintenance_mode:
+        activation:
+          - "Scheduled or immediate"
+          - "Full or partial"
+          - "Custom message"
+          - "Estimated duration"
+        
+        features:
+          - "Read-only mode"
+          - "Admin-only access"
+          - "API restrictions"
+          - "Background job pause"
+
+# ====================
+# 10. 統合機能
+# ====================
+integration_features:
+  
+  external_apis:
+    id: "FRS-IN-001"
+    priority: "必須"
+    description: "外部API統合"
+    
+    functional_details:
+      
+      third_party_services:
+        mapping_services:
+          provider: "Mapbox"
+          apis:
+            - api: "Maps SDK"
+              usage: "Map rendering"
+            - api: "Geocoding API"
+              usage: "Address search"
+            - api: "Directions API"
+              usage: "Route planning"
+          
+          fallback:
+            provider: "Google Maps"
+            auto_switch: true
+        
+        translation_services:
+          provider: "DeepL"
+          apis:
+            - api: "Translation API"
+              usage: "Content translation"
+              limits: "5M chars/month"
+          
+          optimization:
+            - "Batch requests"
+            - "Cache translations"
+            - "Language detection"
+        
+        payment_services:
+          provider: "Stripe"
+          apis:
+            - api: "Payment Intents"
+              usage: "One-time payments"
+            - api: "Subscriptions"
+              usage: "Recurring billing"
+            - api: "Customer Portal"
+              usage: "Self-service"
+          
+          compliance:
+            - "PCI DSS"
+            - "SCA"
+            - "Tax calculation"
+      
+      data_sources:
+        event_aggregation:
+          sources:
+            - "Eventbrite API"
+            - "Facebook Events"
+            - "Municipal calendars"
+          
+          sync:
+            frequency: "Hourly"
+            deduplication: true
+            enrichment: "Add location, categories"
+        
+        poi_data:
+          sources:
+            - "Google Places"
+            - "Foursquare"
+            - "OpenStreetMap"
+          
+          updates:
+            frequency: "Daily"
+            validation: "Cross-reference"
+  
+  internal_apis:
+    id: "FRS-IN-002"
+    priority: "必須"
+    description: "内部API"
+    
+    functional_details:
+      
+      api_design:
+        architecture: "RESTful + GraphQL"
+        versioning: "URL path (/v1, /v2)"
+        documentation: "OpenAPI 3.0"
+        
+        authentication:
+          method: "Bearer token (JWT)"
+          scopes: "Fine-grained permissions"
+          rate_limiting: "Per-client limits"
+      
+      api_endpoints:
+        core_resources:
+          - resource: "Users"
+            operations: ["GET", "POST", "PUT", "DELETE"]
+            filters: ["location", "interests", "activity"]
+          
+          - resource: "Posts"
+            operations: ["GET", "POST", "PUT", "DELETE"]
+            filters: ["location", "time", "author", "tags"]
+          
+          - resource: "Quests"
+            operations: ["GET", "POST", "PUT"]
+            filters: ["location", "status", "type"]
+          
+          - resource: "Analytics"
+            operations: ["GET"]
+            aggregations: ["time", "location", "demographic"]
+      
+      webhooks:
+        event_types:
+          - "post.created"
+          - "user.registered"
+          - "quest.completed"
+          - "payment.received"
+        
+        delivery:
+          retry: "Exponential backoff"
+          timeout: "30 seconds"
+          verification: "HMAC signature"
+
+# ====================
+# END OF FUNCTIONAL REQUIREMENTS SPECIFICATION
+# ====================

@@ -1,0 +1,1382 @@
+# 非機能要求仕様書（NFRS: Non-Functional Requirements Specification）
+# ============================================
+# プロジェクト: Shibuya Live Canvas
+# ドキュメントID: NFRS-SLC-001
+# バージョン: 1.0.0
+# 作成日: 2025-08-22
+# ステータス: 承認済み
+
+# ====================
+# 1. ドキュメント概要
+# ====================
+document_overview:
+  purpose: |
+    本ドキュメントは、Shibuya Live Canvasシステムの非機能要求を
+    詳細に定義し、システムの品質特性、制約、および運用要件を明確化する。
+  
+  scope:
+    included:
+      - "パフォーマンス要件"
+      - "信頼性・可用性要件"
+      - "セキュリティ要件"
+      - "拡張性要件"
+      - "ユーザビリティ要件"
+      - "互換性要件"
+      - "保守性要件"
+    
+    excluded:
+      - "機能要件"
+      - "ビジネス要件"
+      - "プロジェクト管理要件"
+  
+  quality_model: "ISO/IEC 25010:2011"
+  
+  measurement_criteria:
+    - "定量的メトリクス"
+    - "SLA定義"
+    - "ベンチマーク基準"
+    - "監視・測定方法"
+
+# ====================
+# 2. パフォーマンス要件
+# ====================
+performance_requirements:
+  
+  response_time:
+    id: "NFR-PF-001"
+    priority: "Critical"
+    description: "システム応答時間要件"
+    
+    api_response:
+      requirements:
+        - operation: "GET requests"
+          target_time:
+            p50: "< 200ms"
+            p95: "< 500ms"
+            p99: "< 1000ms"
+          measurement_point: "API Gateway"
+        
+        - operation: "POST requests"
+          target_time:
+            p50: "< 300ms"
+            p95: "< 700ms"
+            p99: "< 1500ms"
+          measurement_point: "API Gateway"
+        
+        - operation: "File upload"
+          target_time:
+            small_files: "< 2s (< 1MB)"
+            medium_files: "< 5s (1-10MB)"
+            large_files: "< 15s (10-100MB)"
+          measurement_point: "Client to storage"
+      
+      database_operations:
+        - operation: "Simple query"
+          target: "< 50ms"
+          complexity: "Single table, indexed"
+        
+        - operation: "Complex query"
+          target: "< 200ms"
+          complexity: "Multi-table join"
+        
+        - operation: "Spatial query"
+          target: "< 100ms"
+          complexity: "Geospatial search"
+    
+    user_interface:
+      mobile_app:
+        - metric: "App launch (cold)"
+          target: "< 3 seconds"
+          conditions: "4G network"
+        
+        - metric: "App launch (warm)"
+          target: "< 1 second"
+          conditions: "Background to foreground"
+        
+        - metric: "Screen transition"
+          target: "< 300ms"
+          conditions: "Within app navigation"
+        
+        - metric: "Map initial load"
+          target: "< 2 seconds"
+          conditions: "Default zoom level"
+        
+        - metric: "Post creation"
+          target: "< 1 second"
+          conditions: "Text only"
+      
+      web_dashboard:
+        - metric: "Page load (initial)"
+          target: "< 3 seconds"
+          conditions: "First visit, cached assets"
+        
+        - metric: "Page load (subsequent)"
+          target: "< 1 second"
+          conditions: "Cached data"
+        
+        - metric: "Data refresh"
+          target: "< 500ms"
+          conditions: "Dashboard update"
+  
+  throughput:
+    id: "NFR-PF-002"
+    priority: "Critical"
+    description: "システムスループット要件"
+    
+    transaction_rates:
+      api_gateway:
+        sustained_load: "10,000 requests/second"
+        peak_load: "25,000 requests/second"
+        burst_duration: "5 minutes"
+      
+      specific_operations:
+        - operation: "User registration"
+          rate: "100/second"
+        - operation: "Post creation"
+          rate: "1,000/second"
+        - operation: "Post retrieval"
+          rate: "5,000/second"
+        - operation: "Translation request"
+          rate: "500/second"
+        - operation: "Notification delivery"
+          rate: "10,000/second"
+    
+    concurrent_users:
+      system_wide:
+        normal_load: "50,000 concurrent users"
+        peak_load: "100,000 concurrent users"
+        special_events: "200,000 concurrent users"
+      
+      per_region:
+        tokyo: "30,000 concurrent users"
+        osaka: "10,000 concurrent users"
+        other: "5,000 concurrent users per city"
+    
+    data_processing:
+      batch_processing:
+        - job: "Daily analytics"
+          data_volume: "10GB"
+          time_window: "2 hours"
+        
+        - job: "Content moderation"
+          throughput: "10,000 items/minute"
+          latency: "< 5 seconds per item"
+        
+        - job: "Recommendation update"
+          frequency: "Every 6 hours"
+          completion_time: "< 30 minutes"
+      
+      stream_processing:
+        - stream: "Location updates"
+          rate: "100,000 events/second"
+          latency: "< 100ms"
+        
+        - stream: "Activity tracking"
+          rate: "50,000 events/second"
+          latency: "< 500ms"
+  
+  resource_utilization:
+    id: "NFR-PF-003"
+    priority: "High"
+    description: "リソース使用効率要件"
+    
+    cpu_utilization:
+      targets:
+        average: "< 60%"
+        peak: "< 80%"
+        sustained_peak_duration: "< 15 minutes"
+      
+      auto_scaling:
+        scale_up_threshold: "70% for 5 minutes"
+        scale_down_threshold: "30% for 10 minutes"
+        cooldown_period: "5 minutes"
+    
+    memory_utilization:
+      targets:
+        application_servers: "< 75%"
+        database_servers: "< 80%"
+        cache_servers: "< 90%"
+      
+      garbage_collection:
+        frequency: "< 1/minute"
+        pause_time: "< 100ms"
+    
+    network_utilization:
+      bandwidth:
+        inbound: "< 1 Gbps sustained"
+        outbound: "< 2 Gbps sustained"
+        burst: "< 5 Gbps for 1 minute"
+      
+      latency:
+        internal: "< 1ms"
+        cross_region: "< 50ms"
+        global: "< 200ms"
+    
+    storage_utilization:
+      database:
+        growth_rate: "100GB/month"
+        max_size: "10TB"
+        iops: "10,000 sustained"
+      
+      object_storage:
+        growth_rate: "1TB/month"
+        max_size: "Unlimited"
+        throughput: "1GB/s"
+
+# ====================
+# 3. 信頼性・可用性要件
+# ====================
+reliability_availability:
+  
+  availability:
+    id: "NFR-RA-001"
+    priority: "Critical"
+    description: "システム可用性要件"
+    
+    service_level_agreement:
+      overall_availability:
+        target: "99.9%"
+        measurement: "Monthly"
+        calculation: "(Total Time - Downtime) / Total Time"
+        exclusions:
+          - "Scheduled maintenance"
+          - "Force majeure"
+      
+      component_availability:
+        - component: "API Gateway"
+          target: "99.95%"
+        - component: "Database (Primary)"
+          target: "99.99%"
+        - component: "Cache Layer"
+          target: "99.9%"
+        - component: "CDN"
+          target: "99.99%"
+    
+    downtime_allowance:
+      monthly:
+        unplanned: "< 43 minutes"
+        planned: "< 4 hours"
+      
+      annual:
+        unplanned: "< 8.76 hours"
+        planned: "< 48 hours"
+    
+    maintenance_windows:
+      regular:
+        frequency: "Monthly"
+        duration: "2 hours"
+        time: "Monday 03:00-05:00 JST"
+        notification: "7 days advance"
+      
+      emergency:
+        notification: "Immediate"
+        maximum_duration: "4 hours"
+        approval: "CTO or delegate"
+  
+  reliability:
+    id: "NFR-RA-002"
+    priority: "Critical"
+    description: "システム信頼性要件"
+    
+    failure_metrics:
+      mtbf: # Mean Time Between Failures
+        target: "> 720 hours (30 days)"
+        measurement: "Component level"
+      
+      mttr: # Mean Time To Repair
+        target: "< 1 hour"
+        includes:
+          - "Detection time"
+          - "Diagnosis time"
+          - "Repair time"
+          - "Verification time"
+      
+      error_rates:
+        application_errors: "< 0.1%"
+        network_errors: "< 0.01%"
+        data_corruption: "< 0.001%"
+    
+    fault_tolerance:
+      redundancy:
+        - component: "Application servers"
+          strategy: "N+2 redundancy"
+          failover: "Automatic"
+        
+        - component: "Database"
+          strategy: "Master-slave replication"
+          failover: "Automatic with manual validation"
+        
+        - component: "Network"
+          strategy: "Multiple ISPs"
+          failover: "BGP routing"
+      
+      failure_handling:
+        - scenario: "Server failure"
+          detection: "< 10 seconds"
+          failover: "< 30 seconds"
+          data_loss: "Zero"
+        
+        - scenario: "Database failure"
+          detection: "< 5 seconds"
+          failover: "< 60 seconds"
+          data_loss: "< 1 second of transactions"
+        
+        - scenario: "Network partition"
+          detection: "< 5 seconds"
+          resolution: "Automatic rerouting"
+          consistency: "Eventually consistent"
+  
+  disaster_recovery:
+    id: "NFR-RA-003"
+    priority: "High"
+    description: "災害復旧要件"
+    
+    recovery_objectives:
+      rpo: # Recovery Point Objective
+        critical_data: "< 1 hour"
+        standard_data: "< 4 hours"
+        archived_data: "< 24 hours"
+      
+      rto: # Recovery Time Objective
+        critical_services: "< 2 hours"
+        standard_services: "< 4 hours"
+        full_recovery: "< 24 hours"
+    
+    backup_strategy:
+      frequency:
+        database:
+          full_backup: "Daily"
+          incremental: "Hourly"
+          transaction_log: "Continuous"
+        
+        files:
+          user_content: "Real-time sync"
+          system_config: "Daily"
+          logs: "Hourly"
+      
+      storage:
+        primary: "Same region, different AZ"
+        secondary: "Different region"
+        tertiary: "Different cloud provider"
+      
+      retention:
+        daily_backups: "7 days"
+        weekly_backups: "4 weeks"
+        monthly_backups: "12 months"
+        yearly_backups: "7 years"
+    
+    dr_testing:
+      frequency: "Quarterly"
+      scope:
+        - "Backup restoration"
+        - "Failover procedures"
+        - "Communication plans"
+        - "Recovery time validation"
+      
+      success_criteria:
+        - "RTO/RPO targets met"
+        - "No data corruption"
+        - "Full functionality restored"
+
+# ====================
+# 4. セキュリティ要件
+# ====================
+security_requirements:
+  
+  access_control:
+    id: "NFR-SE-001"
+    priority: "Critical"
+    description: "アクセス制御要件"
+    
+    authentication:
+      methods:
+        password:
+          requirements:
+            min_length: 8
+            complexity: "Upper + Lower + Number + Special"
+            history: "Last 5 passwords"
+            expiration: "90 days (admin), Never (users)"
+          
+          protection:
+            storage: "Argon2id hashing"
+            transmission: "TLS 1.3"
+            attempts: "5 failures = 15 min lock"
+        
+        multi_factor:
+          methods: ["TOTP", "SMS", "Biometric"]
+          enforcement: "Admin required, User optional"
+          backup_codes: "10 single-use codes"
+        
+        oauth:
+          providers: ["Google", "Apple", "LINE"]
+          scopes: "Minimum required"
+          token_validation: "Every request"
+      
+      session_management:
+        token_type: "JWT with RS256"
+        expiration:
+          access_token: "1 hour"
+          refresh_token: "7 days"
+          idle_timeout: "30 minutes"
+        
+        storage:
+          client: "Secure storage only"
+          server: "Redis with encryption"
+        
+        invalidation:
+          logout: "Immediate"
+          password_change: "All sessions"
+          suspicious_activity: "Selective"
+    
+    authorization:
+      model: "Role-Based Access Control (RBAC)"
+      
+      roles:
+        - role: "super_admin"
+          permissions: ["all"]
+          assignment: "Manual by existing super_admin"
+        
+        - role: "admin"
+          permissions: ["user_management", "content_moderation", "system_config"]
+          assignment: "Super admin"
+        
+        - role: "moderator"
+          permissions: ["content_moderation", "user_warnings"]
+          assignment: "Admin"
+        
+        - role: "business"
+          permissions: ["analytics", "advertising", "venue_management"]
+          assignment: "Verification process"
+        
+        - role: "user"
+          permissions: ["create_content", "interact", "view_public"]
+          assignment: "Default on registration"
+      
+      permission_checking:
+        enforcement: "Every API call"
+        caching: "5 minutes with invalidation"
+        audit: "All permission checks logged"
+  
+  data_protection:
+    id: "NFR-SE-002"
+    priority: "Critical"
+    description: "データ保護要件"
+    
+    encryption:
+      at_rest:
+        databases:
+          method: "AES-256-GCM"
+          key_management: "AWS KMS"
+          key_rotation: "Annual"
+        
+        file_storage:
+          method: "AES-256-CBC"
+          per_file_keys: true
+          key_derivation: "PBKDF2"
+        
+        backups:
+          method: "AES-256-GCM"
+          separate_keys: true
+          key_escrow: "Offline storage"
+      
+      in_transit:
+        external:
+          protocol: "TLS 1.3"
+          cipher_suites:
+            - "TLS_AES_256_GCM_SHA384"
+            - "TLS_AES_128_GCM_SHA256"
+          certificate: "EV SSL"
+        
+        internal:
+          protocol: "TLS 1.2+"
+          mutual_tls: "Service-to-service"
+          certificate_rotation: "Quarterly"
+    
+    privacy:
+      personal_data:
+        classification:
+          - level: "Public"
+            examples: ["Username", "Public posts"]
+            protection: "Standard"
+          
+          - level: "Private"
+            examples: ["Email", "Phone", "Location history"]
+            protection: "Encrypted, access controlled"
+          
+          - level: "Sensitive"
+            examples: ["Payment info", "Government ID"]
+            protection: "Encrypted, audit logged, limited access"
+        
+        handling:
+          collection: "Minimum necessary"
+          consent: "Explicit, granular"
+          retention: "Defined periods"
+          deletion: "Secure wipe"
+      
+      compliance:
+        regulations:
+          - regulation: "GDPR"
+            requirements:
+              - "Right to access"
+              - "Right to rectification"
+              - "Right to erasure"
+              - "Data portability"
+          
+          - regulation: "個人情報保護法"
+            requirements:
+              - "利用目的の特定"
+              - "適正な取得"
+              - "安全管理措置"
+          
+          - regulation: "CCPA"
+            requirements:
+              - "Disclosure requirements"
+              - "Opt-out rights"
+              - "Non-discrimination"
+        
+        audit_trail:
+          data_access: "All access logged"
+          data_modification: "Change history maintained"
+          data_export: "Request and delivery logged"
+  
+  security_monitoring:
+    id: "NFR-SE-003"
+    priority: "High"
+    description: "セキュリティ監視要件"
+    
+    threat_detection:
+      intrusion_detection:
+        system: "AWS GuardDuty + Custom rules"
+        coverage:
+          - "Network traffic"
+          - "API calls"
+          - "User behavior"
+        
+        alert_levels:
+          - level: "Critical"
+            response: "Immediate page"
+            examples: ["Data breach", "Admin compromise"]
+          
+          - level: "High"
+            response: "15 minute response"
+            examples: ["Brute force", "SQL injection"]
+          
+          - level: "Medium"
+            response: "1 hour response"
+            examples: ["Unusual activity", "Policy violation"]
+      
+      vulnerability_scanning:
+        frequency:
+          dependency_scan: "Daily"
+          container_scan: "On build"
+          infrastructure_scan: "Weekly"
+          penetration_test: "Quarterly"
+        
+        tools:
+          - "Snyk (dependencies)"
+          - "Trivy (containers)"
+          - "AWS Inspector (infrastructure)"
+          - "External pentest firm"
+      
+      log_management:
+        collection:
+          sources: ["Application", "System", "Network", "Security"]
+          format: "Structured JSON"
+          transport: "TLS encrypted"
+        
+        storage:
+          location: "Centralized SIEM"
+          retention: "90 days hot, 2 years cold"
+          integrity: "Hash chain validation"
+        
+        analysis:
+          real_time: "Critical patterns"
+          batch: "Anomaly detection"
+          ml_based: "Behavioral analysis"
+
+# ====================
+# 5. 拡張性要件
+# ====================
+scalability_requirements:
+  
+  horizontal_scalability:
+    id: "NFR-SC-001"
+    priority: "High"
+    description: "水平拡張性要件"
+    
+    auto_scaling:
+      application_tier:
+        min_instances: 3
+        max_instances: 100
+        target_metrics:
+          - metric: "CPU utilization"
+            target: "70%"
+          - metric: "Request rate"
+            target: "1000 req/s per instance"
+          - metric: "Response time"
+            target: "500ms p95"
+        
+        scale_out:
+          threshold: "Any metric > target for 3 minutes"
+          increment: "20% of current"
+          cooldown: "5 minutes"
+        
+        scale_in:
+          threshold: "All metrics < 50% target for 10 minutes"
+          decrement: "10% of current"
+          cooldown: "10 minutes"
+      
+      database_tier:
+        read_replicas:
+          min: 2
+          max: 10
+          auto_add: "Based on read load"
+          lag_threshold: "< 1 second"
+        
+        sharding:
+          strategy: "Hash-based on user_id"
+          shard_count: "Start with 4, max 64"
+          rebalancing: "Online with minimal downtime"
+    
+    geographic_distribution:
+      regions:
+        primary: "Asia Pacific (Tokyo)"
+        secondary: "US West (California)"
+        tertiary: "Europe (Frankfurt)"
+      
+      data_replication:
+        strategy: "Multi-master"
+        consistency: "Eventually consistent"
+        conflict_resolution: "Last write wins + CRDT"
+      
+      traffic_distribution:
+        method: "GeoDNS + CDN"
+        failover: "Automatic with health checks"
+        latency_based: true
+  
+  vertical_scalability:
+    id: "NFR-SC-002"
+    priority: "Medium"
+    description: "垂直拡張性要件"
+    
+    resource_limits:
+      compute:
+        cpu:
+          min: "2 vCPU"
+          max: "96 vCPU"
+          increment: "Power of 2"
+        
+        memory:
+          min: "4 GB"
+          max: "768 GB"
+          ratio: "4 GB per vCPU"
+      
+      storage:
+        database:
+          min: "100 GB"
+          max: "64 TB"
+          iops: "Up to 256,000"
+        
+        object_storage:
+          limit: "Unlimited"
+          throughput: "Up to 100 Gbps"
+    
+    upgrade_strategy:
+      online_upgrade: "Required"
+      downtime: "< 5 minutes"
+      rollback: "Possible within 24 hours"
+  
+  data_scalability:
+    id: "NFR-SC-003"
+    priority: "High"
+    description: "データ拡張性要件"
+    
+    data_growth:
+      projections:
+        users:
+          year_1: "100,000"
+          year_3: "1,000,000"
+          year_5: "10,000,000"
+        
+        posts:
+          daily: "100,000"
+          retention: "1 year active, archive after"
+          size: "~5 KB per post"
+        
+        media:
+          daily: "1 TB"
+          retention: "Intelligent tiering"
+          compression: "WebP for images, H.265 for video"
+    
+    partitioning:
+      strategy:
+        posts: "Range partitioning by date"
+        users: "Hash partitioning by user_id"
+        analytics: "Time-series partitioning"
+      
+      maintenance:
+        partition_size: "< 100 GB"
+        auto_partition: true
+        archive_old: "After 90 days"
+    
+    query_optimization:
+      indexing:
+        strategy: "Covering indexes for common queries"
+        maintenance: "Online index builds"
+        monitoring: "Index usage statistics"
+      
+      caching:
+        levels:
+          - level: "Application"
+            cache: "In-memory"
+            ttl: "5 minutes"
+          - level: "Database"
+            cache: "Redis"
+            ttl: "1 hour"
+          - level: "CDN"
+            cache: "Edge locations"
+            ttl: "24 hours"
+
+# ====================
+# 6. ユーザビリティ要件
+# ====================
+usability_requirements:
+  
+  user_interface:
+    id: "NFR-US-001"
+    priority: "High"
+    description: "ユーザーインターフェース要件"
+    
+    responsiveness:
+      interaction_feedback:
+        immediate: "< 100ms"
+        simple_action: "< 1 second"
+        complex_action: "< 10 seconds"
+      
+      visual_feedback:
+        - "Loading indicators for > 500ms operations"
+        - "Progress bars for > 2 second operations"
+        - "Skeleton screens for content loading"
+        - "Optimistic UI updates"
+    
+    consistency:
+      design_system:
+        - "Unified color palette"
+        - "Consistent typography"
+        - "Standard component library"
+        - "Platform-specific adaptations"
+      
+      behavior:
+        - "Predictable navigation"
+        - "Consistent gestures"
+        - "Standard shortcuts"
+        - "Uniform error handling"
+    
+    error_handling:
+      error_messages:
+        characteristics:
+          - "Clear and specific"
+          - "Actionable"
+          - "Non-technical language"
+          - "Localized"
+        
+        types:
+          - type: "Validation"
+            display: "Inline, real-time"
+          - type: "System"
+            display: "Toast/Modal"
+          - type: "Network"
+            display: "Retry option"
+      
+      recovery:
+        - "Auto-save drafts"
+        - "Undo/Redo support"
+        - "Graceful degradation"
+        - "Offline mode"
+  
+  accessibility:
+    id: "NFR-US-002"
+    priority: "High"
+    description: "アクセシビリティ要件"
+    
+    standards_compliance:
+      wcag: "2.1 Level AA"
+      section_508: "Compliant"
+      jis_x_8341: "適合レベル AA"
+    
+    visual_accessibility:
+      - requirement: "Color contrast"
+        spec: "4.5:1 for normal text, 3:1 for large"
+      - requirement: "Text scaling"
+        spec: "Up to 200% without horizontal scroll"
+      - requirement: "Color independence"
+        spec: "Information not conveyed by color alone"
+      - requirement: "Focus indicators"
+        spec: "Visible keyboard focus"
+    
+    motor_accessibility:
+      - requirement: "Touch targets"
+        spec: "Minimum 44x44 px"
+      - requirement: "Gesture alternatives"
+        spec: "Button alternatives for gestures"
+      - requirement: "Timing adjustable"
+        spec: "User control over time limits"
+    
+    cognitive_accessibility:
+      - requirement: "Clear navigation"
+        spec: "Consistent, predictable"
+      - requirement: "Simple language"
+        spec: "Grade 8 reading level"
+      - requirement: "Error prevention"
+        spec: "Confirmation for destructive actions"
+    
+    assistive_technology:
+      screen_readers:
+        - "VoiceOver (iOS)"
+        - "TalkBack (Android)"
+        - "NVDA (Windows)"
+        - "JAWS (Windows)"
+      
+      support:
+        - "Semantic HTML"
+        - "ARIA labels"
+        - "Keyboard navigation"
+        - "Skip links"
+  
+  learnability:
+    id: "NFR-US-003"
+    priority: "Medium"
+    description: "学習容易性要件"
+    
+    onboarding:
+      first_time_user:
+        - "Interactive tutorial"
+        - "Progressive disclosure"
+        - "Contextual hints"
+        - "Sample content"
+      
+      success_metrics:
+        - "80% complete onboarding"
+        - "First post within 5 minutes"
+        - "3 key features discovered in first session"
+    
+    help_system:
+      in_app_help:
+        - "Contextual tooltips"
+        - "FAQ section"
+        - "Video tutorials"
+        - "Chat support"
+      
+      documentation:
+        - "User guide"
+        - "Video library"
+        - "Community forum"
+        - "API documentation"
+    
+    user_testing:
+      frequency: "Monthly"
+      participants: "10-15 per test"
+      metrics:
+        - "Task completion rate > 90%"
+        - "Error rate < 5%"
+        - "Time on task improving"
+        - "Satisfaction score > 4/5"
+
+# ====================
+# 7. 互換性要件
+# ====================
+compatibility_requirements:
+  
+  platform_compatibility:
+    id: "NFR-CO-001"
+    priority: "High"
+    description: "プラットフォーム互換性要件"
+    
+    mobile_platforms:
+      ios:
+        minimum_version: "14.0"
+        target_versions: ["15", "16", "17"]
+        devices:
+          - "iPhone 8 and later"
+          - "iPad (6th gen) and later"
+          - "iPad Pro (all)"
+        
+        testing_coverage:
+          - "Latest 3 iOS versions"
+          - "Popular device models"
+          - "Different screen sizes"
+      
+      android:
+        minimum_api: "26 (Android 8.0)"
+        target_api: "34 (Android 14)"
+        devices:
+          manufacturers: ["Samsung", "Google", "Xiaomi", "OPPO"]
+          screen_sizes: ["Small", "Normal", "Large", "X-Large"]
+          densities: ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
+        
+        testing_coverage:
+          - "API 26-34"
+          - "Top 20 devices by market share"
+          - "Different Android flavors"
+    
+    web_browsers:
+      desktop:
+        - browser: "Chrome"
+          versions: "Last 3 versions"
+          market_share: "~65%"
+        - browser: "Safari"
+          versions: "Last 2 versions"
+          market_share: "~19%"
+        - browser: "Firefox"
+          versions: "Last 3 versions"
+          market_share: "~4%"
+        - browser: "Edge"
+          versions: "Last 3 versions"
+          market_share: "~4%"
+      
+      mobile:
+        - "Chrome Mobile"
+        - "Safari Mobile"
+        - "Samsung Internet"
+        - "UC Browser"
+      
+      feature_support:
+        required:
+          - "ES2020 JavaScript"
+          - "CSS Grid/Flexbox"
+          - "WebSocket"
+          - "Service Workers"
+        
+        progressive_enhancement:
+          - "WebP images (fallback to JPEG)"
+          - "WebRTC (fallback to polling)"
+          - "Web Workers (fallback to main thread)"
+  
+  api_compatibility:
+    id: "NFR-CO-002"
+    priority: "High"
+    description: "API互換性要件"
+    
+    versioning:
+      strategy: "URL path versioning"
+      format: "/api/v{major}"
+      current: "v1"
+      
+      deprecation_policy:
+        notice_period: "6 months"
+        sunset_period: "12 months"
+        communication: ["Email", "API response headers", "Documentation"]
+    
+    backward_compatibility:
+      breaking_changes:
+        - "New major version required"
+        - "Migration guide provided"
+        - "Parallel run period: 6 months"
+      
+      non_breaking_changes:
+        - "New optional fields"
+        - "New endpoints"
+        - "New optional parameters"
+    
+    client_compatibility:
+      sdk_support:
+        - language: "JavaScript/TypeScript"
+          min_version: "Node 16+"
+        - language: "Swift"
+          min_version: "5.0+"
+        - language: "Kotlin"
+          min_version: "1.5+"
+        - language: "Python"
+          min_version: "3.8+"
+      
+      sdk_updates:
+        frequency: "Monthly"
+        testing: "Automated against all API versions"
+        changelog: "Detailed with migration guides"
+  
+  data_format_compatibility:
+    id: "NFR-CO-003"
+    priority: "Medium"
+    description: "データフォーマット互換性要件"
+    
+    import_formats:
+      supported:
+        - format: "JSON"
+          versions: ["RFC 8259"]
+        - format: "CSV"
+          encoding: ["UTF-8", "Shift-JIS"]
+        - format: "XML"
+          versions: ["1.0", "1.1"]
+      
+      validation:
+        - "Schema validation"
+        - "Encoding detection"
+        - "Error reporting"
+    
+    export_formats:
+      supported:
+        - format: "JSON"
+          pretty_print: "Optional"
+        - format: "CSV"
+          delimiter: "Configurable"
+        - format: "PDF"
+          layout: "A4, Letter"
+        - format: "Excel"
+          versions: ["2016+"]
+    
+    media_formats:
+      images:
+        input: ["JPEG", "PNG", "WebP", "HEIF", "GIF"]
+        output: ["JPEG", "PNG", "WebP"]
+        processing: "Auto-conversion"
+      
+      videos:
+        input: ["MP4", "MOV", "AVI", "WebM"]
+        output: ["MP4 (H.264)", "WebM (VP9)"]
+        processing: "Transcoding to standard formats"
+      
+      audio:
+        input: ["MP3", "AAC", "WAV"]
+        output: ["AAC", "MP3"]
+        processing: "Normalization"
+
+# ====================
+# 8. 保守性要件
+# ====================
+maintainability_requirements:
+  
+  code_quality:
+    id: "NFR-MA-001"
+    priority: "High"
+    description: "コード品質要件"
+    
+    coding_standards:
+      languages:
+        - language: "TypeScript"
+          style_guide: "Airbnb"
+          linter: "ESLint"
+          formatter: "Prettier"
+        
+        - language: "Python"
+          style_guide: "PEP 8"
+          linter: "Pylint"
+          formatter: "Black"
+        
+        - language: "Go"
+          style_guide: "Effective Go"
+          linter: "golangci-lint"
+          formatter: "gofmt"
+    
+    code_metrics:
+      complexity:
+        cyclomatic_complexity: "< 10"
+        cognitive_complexity: "< 15"
+        nesting_depth: "< 4"
+      
+      maintainability_index: "> 70"
+      
+      test_coverage:
+        unit_tests: "> 80%"
+        integration_tests: "> 60%"
+        e2e_tests: "Critical paths"
+      
+      technical_debt:
+        ratio: "< 5%"
+        resolution_time: "Within 3 sprints"
+    
+    code_review:
+      process:
+        - "All code peer reviewed"
+        - "Automated checks must pass"
+        - "Security review for sensitive changes"
+      
+      checklist:
+        - "Functionality correct"
+        - "Tests included"
+        - "Documentation updated"
+        - "Performance acceptable"
+        - "Security considered"
+  
+  documentation:
+    id: "NFR-MA-002"
+    priority: "High"
+    description: "ドキュメント要件"
+    
+    technical_documentation:
+      api_documentation:
+        format: "OpenAPI 3.0"
+        coverage: "100% endpoints"
+        examples: "Request/Response for all operations"
+        automation: "Generated from code"
+      
+      code_documentation:
+        inline_comments: "Complex logic explained"
+        function_docs: "All public APIs"
+        module_docs: "Purpose and usage"
+        architecture_docs: "System design and decisions"
+      
+      database_documentation:
+        schema: "ERD and data dictionary"
+        procedures: "Backup, restore, maintenance"
+        queries: "Common query patterns"
+    
+    operational_documentation:
+      runbooks:
+        - "Deployment procedures"
+        - "Rollback procedures"
+        - "Incident response"
+        - "Disaster recovery"
+      
+      monitoring:
+        - "Alert definitions"
+        - "Dashboard configurations"
+        - "Metrics glossary"
+        - "Troubleshooting guides"
+    
+    user_documentation:
+      end_user:
+        - "User manual"
+        - "FAQ"
+        - "Video tutorials"
+        - "Release notes"
+      
+      developer:
+        - "API reference"
+        - "SDK guides"
+        - "Integration examples"
+        - "Webhook documentation"
+  
+  monitoring_observability:
+    id: "NFR-MA-003"
+    priority: "High"
+    description: "監視・可観測性要件"
+    
+    logging:
+      standards:
+        format: "Structured JSON"
+        levels: ["ERROR", "WARN", "INFO", "DEBUG", "TRACE"]
+        correlation_id: "Required for all requests"
+      
+      requirements:
+        - "All errors logged with stack trace"
+        - "All API calls logged"
+        - "Performance metrics logged"
+        - "Security events logged"
+      
+      retention:
+        production: "30 days hot, 1 year cold"
+        staging: "7 days"
+        development: "1 day"
+    
+    metrics:
+      application_metrics:
+        - "Request rate"
+        - "Error rate"
+        - "Response time"
+        - "Saturation"
+      
+      business_metrics:
+        - "User activity"
+        - "Feature usage"
+        - "Conversion rates"
+        - "Revenue metrics"
+      
+      infrastructure_metrics:
+        - "CPU/Memory/Disk"
+        - "Network I/O"
+        - "Database connections"
+        - "Cache hit rates"
+    
+    tracing:
+      distributed_tracing:
+        implementation: "OpenTelemetry"
+        sampling_rate: "1% (adjustable)"
+        span_attributes:
+          - "Service name"
+          - "Operation name"
+          - "User ID"
+          - "Request ID"
+      
+      trace_retention: "7 days"
+      
+      visualization: "Jaeger UI"
+    
+    alerting:
+      alert_channels:
+        - channel: "Email"
+          for: "Low priority"
+        - channel: "Slack"
+          for: "Medium priority"
+        - channel: "PagerDuty"
+          for: "High/Critical priority"
+      
+      alert_rules:
+        - "Based on SLOs"
+        - "Multi-window multi-burn-rate"
+        - "Intelligent grouping"
+        - "Automatic escalation"
+
+# ====================
+# 9. 環境要件
+# ====================
+environmental_requirements:
+  
+  operating_environment:
+    id: "NFR-EN-001"
+    priority: "High"
+    description: "動作環境要件"
+    
+    server_environment:
+      operating_system:
+        - "Ubuntu 22.04 LTS"
+        - "Amazon Linux 2023"
+        - "Container: Alpine Linux"
+      
+      runtime:
+        - "Node.js 20.x"
+        - "Python 3.11+"
+        - "Go 1.21+"
+        - "Java 17 (for specific services)"
+      
+      containerization:
+        platform: "Docker"
+        orchestration: "Kubernetes 1.27+"
+        registry: "ECR/Docker Hub"
+    
+    network_environment:
+      bandwidth:
+        minimum: "100 Mbps"
+        recommended: "1 Gbps"
+        burst: "10 Gbps"
+      
+      latency:
+        lan: "< 1ms"
+        wan: "< 100ms"
+        internet: "< 200ms"
+      
+      protocols:
+        - "HTTP/2"
+        - "WebSocket"
+        - "gRPC"
+        - "MQTT (for IoT)"
+    
+    client_environment:
+      mobile:
+        network: "3G minimum, 4G/5G recommended"
+        storage: "100 MB available"
+        ram: "2 GB minimum"
+      
+      web:
+        screen_resolution: "1024x768 minimum"
+        javascript: "Enabled"
+        cookies: "Enabled"
+        localstorage: "5 MB minimum"
+  
+  development_environment:
+    id: "NFR-EN-002"
+    priority: "Medium"
+    description: "開発環境要件"
+    
+    local_development:
+      tools:
+        - "Docker Desktop"
+        - "Node.js 20+"
+        - "Git 2.30+"
+        - "VS Code / IntelliJ"
+      
+      services:
+        - "Local Kubernetes (minikube/kind)"
+        - "Local database (PostgreSQL/MongoDB)"
+        - "Local cache (Redis)"
+        - "Mock services"
+    
+    ci_cd_environment:
+      ci_platform: "GitHub Actions"
+      cd_platform: "ArgoCD"
+      
+      pipeline_stages:
+        - "Lint"
+        - "Unit tests"
+        - "Build"
+        - "Security scan"
+        - "Integration tests"
+        - "Deploy to staging"
+        - "E2E tests"
+        - "Deploy to production"
+      
+      environments:
+        - name: "Development"
+          auto_deploy: "On commit to develop"
+        - name: "Staging"
+          auto_deploy: "On PR merge"
+        - name: "Production"
+          auto_deploy: "On tag/manual"
+
+# ====================
+# 10. 規制・コンプライアンス要件
+# ====================
+regulatory_compliance:
+  
+  data_privacy:
+    id: "NFR-RC-001"
+    priority: "Critical"
+    description: "データプライバシー規制要件"
+    
+    gdpr_compliance:
+      requirements:
+        - "Privacy by design"
+        - "Lawful basis for processing"
+        - "Consent management"
+        - "Data subject rights"
+        - "Data protection officer"
+        - "Privacy impact assessment"
+      
+      technical_measures:
+        - "Encryption"
+        - "Pseudonymization"
+        - "Access controls"
+        - "Audit logging"
+    
+    japan_privacy_law:
+      requirements:
+        - "個人情報の適正な取得"
+        - "利用目的の特定・通知"
+        - "安全管理措置"
+        - "第三者提供の制限"
+        - "開示請求への対応"
+      
+      technical_measures:
+        - "データ暗号化"
+        - "アクセス制御"
+        - "監査ログ"
+        - "データ削除機能"
+  
+  industry_standards:
+    id: "NFR-RC-002"
+    priority: "High"
+    description: "業界標準準拠要件"
+    
+    security_standards:
+      - standard: "ISO 27001"
+        scope: "Information security management"
+      - standard: "SOC 2 Type II"
+        scope: "Service organization controls"
+      - standard: "OWASP Top 10"
+        scope: "Web application security"
+    
+    payment_standards:
+      - standard: "PCI DSS"
+        level: "Level 1"
+        scope: "Payment card data"
+    
+    accessibility_standards:
+      - standard: "WCAG 2.1"
+        level: "AA"
+      - standard: "Section 508"
+        scope: "US accessibility"
+      - standard: "JIS X 8341"
+        level: "適合レベル AA"
+
+# ====================
+# END OF NON-FUNCTIONAL REQUIREMENTS SPECIFICATION
+# ====================

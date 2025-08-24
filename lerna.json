@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "npmClient": "npm",
+  "packages": [
+    "packages/web",
+    "packages/mobile",
+    "packages/api-gateway",
+    "packages/services/*",
+    "packages/shared/*"
+  ],
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish",
+      "registry": "https://npm.pkg.github.com",
+      "allowBranch": ["main", "develop"]
+    },
+    "version": {
+      "allowBranch": ["main", "develop"],
+      "conventionalCommits": true
+    },
+    "bootstrap": {
+      "hoist": true
+    },
+    "run": {
+      "stream": true
+    }
+  },
+  "ignoreChanges": [
+    "**/__tests__/**",
+    "**/*.md",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

@@ -17,7 +17,7 @@ The project currently consists of comprehensive requirements and business specif
 ## Key Technical Details
 
 ### Planned Architecture
-- **Frontend**: React Native (mobile), Next.js 14 (web)
+- **Frontend**: React Native (mobile),expo,  Next.js
 - **Backend**: Microservices (Node.js/NestJS, Go/Gin, Python/FastAPI)
 - **Database**: PostgreSQL (primary), MongoDB (NoSQL), Redis (cache), Elasticsearch (search)
 - **Infrastructure**: AWS (EKS, RDS, S3, CloudFront), Kubernetes
@@ -46,13 +46,71 @@ When implementing features, always refer to:
 1. The detailed requirements in `docs/requirements-definition-ultra-detailed.yaml` for technical specifications
 2. The business requirements in `docs/01_business_requirements_specification.yaml` for business context
 
+## Project Directory Structure
+
+```
+shibuya-live-canvas/
+├── packages/                   # Monorepo packages (npm workspaces)
+│   ├── web/                   # Next.js web application
+│   ├── mobile/                # Expo (React Native) mobile application
+│   │   ├── src/              # Source code
+│   │   │   ├── screens/      # Screen components
+│   │   │   ├── components/   # Reusable UI components
+│   │   │   ├── navigation/   # Navigation configuration
+│   │   │   ├── services/     # API and external services
+│   │   │   ├── hooks/        # Custom React hooks
+│   │   │   ├── utils/        # Utility functions
+│   │   │   ├── store/        # Redux store and slices
+│   │   │   ├── types/        # TypeScript types
+│   │   │   ├── constants/    # App constants
+│   │   │   └── config/       # App configuration
+│   │   ├── assets/           # Static assets
+│   │   │   ├── images/       # Image files
+│   │   │   ├── fonts/        # Custom fonts
+│   │   │   └── animations/   # Lottie animations
+│   │   ├── app.json          # Expo configuration
+│   │   ├── App.tsx           # App entry point
+│   │   └── index.ts          # Expo entry point
+│   ├── api-gateway/           # API Gateway service
+│   ├── services/              # Microservices
+│   │   ├── user/             # User management service
+│   │   ├── post/             # Post management service
+│   │   ├── quest/            # Quest system service
+│   │   └── analytics/        # Analytics service
+│   └── shared/               # Shared packages
+│       ├── types/            # TypeScript type definitions
+│       ├── utils/            # Utility functions
+│       └── config/           # Shared configurations
+├── infrastructure/            # Infrastructure as Code
+│   ├── kubernetes/           # K8s manifests and Helm charts
+│   ├── terraform/            # Terraform configurations
+│   └── docker/               # Dockerfiles and compose files
+├── scripts/                   # Build and deployment scripts
+├── tools/                     # Development tools and utilities
+├── tests/                     # End-to-end and integration tests
+│   ├── e2e/                  # End-to-end tests
+│   └── integration/          # Integration tests
+└── docs/                      # Documentation
+    ├── api/                   # API documentation
+    ├── architecture/          # Architecture diagrams and decisions
+    └── guides/                # Development and deployment guides
+
+## Development Commands
+
+Key commands for development:
+- `npm run dev` - Start all services in development mode
+- `npm run build` - Build all packages
+- `npm run test` - Run tests across all packages
+- `npm run lint` - Run linting across all packages
+- `npm run typecheck` - Type check all TypeScript code
+- `npm run clean` - Clean all build artifacts and node_modules
+
 ## Future Development Commands
 
-Once development begins, key commands will include:
-- Build commands for React Native and Next.js applications
+Once development progresses, additional commands will include:
 - Docker commands for containerized services
 - Kubernetes deployment commands
 - Database migration scripts
-- Test execution commands
+- CI/CD pipeline commands
 
 These will be added as the project progresses from requirements to implementation phase.

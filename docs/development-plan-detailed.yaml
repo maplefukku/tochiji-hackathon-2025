@@ -1,0 +1,1356 @@
+# Shibuya Live Canvas - 詳細開発計画書
+# ============================================
+# 作成日: 2025-08-24
+# バージョン: 2.0.0
+# ステータス: 詳細版
+
+# ====================
+# 1. Phase 0 - POC開発詳細（30日間）
+# ====================
+phase_0_poc_detailed:
+  
+  # Week 1: 開発環境構築と技術検証
+  week_1_environment_setup:
+    day_1_monday:
+      title: "プロジェクト初期化"
+      tasks:
+        - task: "Gitリポジトリセットアップ"
+          subtasks:
+            - "GitHubリポジトリ作成"
+            - "モノレポ構造設計"
+            - "ブランチ戦略策定（Git Flow）"
+            - ".gitignore設定"
+            - "コミットルール策定"
+          duration: "2時間"
+          output:
+            - "/.gitignore"
+            - "/README.md"
+            - "/CONTRIBUTING.md"
+            
+        - task: "プロジェクト構造作成"
+          subtasks:
+            - "ディレクトリ構造設計"
+            - "パッケージ管理設定（npm workspaces）"
+            - "共通設定ファイル作成"
+            - "CLAUDE.mdへのディレクトリ構成記載"
+          duration: "3時間"
+          output:
+            - "/package.json"
+            - "/lerna.json"
+            - "/tsconfig.base.json"
+            - "/CLAUDE.md (更新)"
+          status: "完了"
+            
+        - task: "開発ツール設定"
+          subtasks:
+            - "ESLint設定"
+            - "Prettier設定"
+            - "Husky設定（pre-commit hooks）"
+            - "CommitLint設定"
+          duration: "3時間"
+          output:
+            - "/.eslintrc.js"
+            - "/.prettierrc"
+            - "/.husky/"
+            
+    day_2_tuesday:
+      title: "Docker環境構築"
+      tasks:
+        - task: "Docker基本設定"
+          subtasks:
+            - "Docker Compose設計"
+            - "ベースイメージ選定"
+            - "マルチステージビルド設定"
+            - "ネットワーク設計"
+          duration: "4時間"
+          output:
+            - "/docker-compose.yml"
+            - "/docker-compose.dev.yml"
+            - "/docker-compose.test.yml"
+            
+        - task: "サービスコンテナ作成"
+          subtasks:
+            - "PostgreSQLコンテナ設定"
+            - "MongoDBコンテナ設定"
+            - "Redisコンテナ設定"
+            - "Elasticsearchコンテナ設定"
+          duration: "4時間"
+          output:
+            - "/docker/postgres/Dockerfile"
+            - "/docker/mongodb/Dockerfile"
+            - "/docker/redis/redis.conf"
+            
+    day_3_wednesday:
+      title: "CI/CD基礎設定"
+      tasks:
+        - task: "GitHub Actions設定"
+          subtasks:
+            - "ビルドワークフロー作成"
+            - "テストワークフロー作成"
+            - "Lintワークフロー作成"
+            - "セキュリティスキャン設定"
+          duration: "4時間"
+          output:
+            - "/.github/workflows/build.yml"
+            - "/.github/workflows/test.yml"
+            - "/.github/workflows/lint.yml"
+            
+        - task: "AWS環境準備"
+          subtasks:
+            - "IAMロール作成"
+            - "VPC設計・作成"
+            - "ECRリポジトリ作成"
+            - "S3バケット作成"
+          duration: "4時間"
+          output:
+            - "/infrastructure/terraform/aws/"
+            - "/infrastructure/terraform/variables.tf"
+            
+    day_4_thursday:
+      title: "Mapbox統合検証"
+      tasks:
+        - task: "Mapbox環境設定"
+          subtasks:
+            - "Mapboxアカウント作成"
+            - "APIキー取得・管理"
+            - "使用制限設定"
+            - "料金プラン確認"
+          duration: "2時間"
+          
+        - task: "基本地図実装"
+          subtasks:
+            - "Mapbox GL JS導入"
+            - "基本地図表示実装"
+            - "カスタムスタイル作成"
+            - "マーカー表示テスト"
+          duration: "6時間"
+          output:
+            - "/poc/mapbox-test/"
+            - "/poc/mapbox-test/index.html"
+            - "/poc/mapbox-test/map.js"
+            
+    day_5_friday:
+      title: "リアルタイム通信検証"
+      tasks:
+        - task: "WebSocket検証"
+          subtasks:
+            - "Socket.io導入"
+            - "基本的な双方向通信実装"
+            - "接続管理実装"
+            - "エラーハンドリング"
+          duration: "4時間"
+          output:
+            - "/poc/websocket-test/"
+            - "/poc/websocket-test/server.js"
+            - "/poc/websocket-test/client.js"
+            
+        - task: "パフォーマンステスト"
+          subtasks:
+            - "同時接続数テスト"
+            - "メッセージレート測定"
+            - "レイテンシ測定"
+            - "負荷テストシナリオ作成"
+          duration: "4時間"
+          output:
+            - "/poc/performance-test/"
+            - "/poc/performance-test/results.md"
+            
+  # Week 2: バックエンドPOC開発
+  week_2_backend_poc:
+    day_6_monday:
+      title: "マイクロサービス基盤構築"
+      tasks:
+        - task: "API Gateway設計"
+          subtasks:
+            - "Kong/Nginx選定・設定"
+            - "ルーティング設計"
+            - "認証フロー設計"
+            - "レート制限設定"
+          duration: "4時間"
+          output:
+            - "/services/gateway/"
+            - "/services/gateway/kong.yml"
+            
+        - task: "サービス間通信設計"
+          subtasks:
+            - "gRPC vs REST選定"
+            - "Protocol Buffers定義"
+            - "サービスディスカバリ設定"
+            - "サーキットブレーカー実装"
+          duration: "4時間"
+          output:
+            - "/proto/"
+            - "/proto/auth.proto"
+            - "/proto/location.proto"
+            
+    day_7_tuesday:
+      title: "認証サービス実装"
+      tasks:
+        - task: "NestJS プロジェクト作成"
+          subtasks:
+            - "NestJS CLI インストール"
+            - "プロジェクト生成"
+            - "モジュール構造設計"
+            - "依存関係設定"
+          duration: "2時間"
+          output:
+            - "/services/auth/"
+            - "/services/auth/package.json"
+            - "/services/auth/nest-cli.json"
+            
+        - task: "JWT認証実装"
+          subtasks:
+            - "Passport.js統合"
+            - "JWT生成・検証"
+            - "リフレッシュトークン実装"
+            - "セッション管理"
+          duration: "6時間"
+          output:
+            - "/services/auth/src/auth/"
+            - "/services/auth/src/auth/jwt.strategy.ts"
+            - "/services/auth/src/auth/auth.service.ts"
+            
+    day_8_wednesday:
+      title: "ユーザー管理実装"
+      tasks:
+        - task: "TypeORM設定"
+          subtasks:
+            - "エンティティ定義"
+            - "マイグレーション設定"
+            - "リレーション設計"
+            - "インデックス最適化"
+          duration: "4時間"
+          output:
+            - "/services/auth/src/entities/"
+            - "/services/auth/src/entities/user.entity.ts"
+            - "/services/auth/src/migrations/"
+            
+        - task: "CRUD API実装"
+          subtasks:
+            - "ユーザー登録API"
+            - "プロフィール更新API"
+            - "パスワード変更API"
+            - "アカウント削除API"
+          duration: "4時間"
+          output:
+            - "/services/auth/src/users/"
+            - "/services/auth/src/users/users.controller.ts"
+            - "/services/auth/src/users/users.service.ts"
+            
+    day_9_thursday:
+      title: "位置情報サービス実装（Go）"
+      tasks:
+        - task: "Gin プロジェクト作成"
+          subtasks:
+            - "Go modules初期化"
+            - "Gin framework導入"
+            - "プロジェクト構造設計"
+            - "設定管理実装"
+          duration: "2時間"
+          output:
+            - "/services/location/"
+            - "/services/location/go.mod"
+            - "/services/location/main.go"
+            
+        - task: "MongoDB統合"
+          subtasks:
+            - "MongoDB driver設定"
+            - "コレクション設計"
+            - "地理空間インデックス作成"
+            - "クエリ最適化"
+          duration: "6時間"
+          output:
+            - "/services/location/internal/db/"
+            - "/services/location/internal/models/"
+            - "/services/location/internal/repository/"
+            
+    day_10_friday:
+      title: "位置情報API実装"
+      tasks:
+        - task: "位置情報処理"
+          subtasks:
+            - "GeoJSON形式対応"
+            - "距離計算アルゴリズム"
+            - "エリア検索実装"
+            - "リアルタイム位置更新"
+          duration: "4時間"
+          output:
+            - "/services/location/internal/handlers/"
+            - "/services/location/internal/services/"
+            
+        - task: "パフォーマンス最適化"
+          subtasks:
+            - "キャッシュ戦略実装"
+            - "バッチ処理実装"
+            - "非同期処理実装"
+            - "コネクションプール設定"
+          duration: "4時間"
+          output:
+            - "/services/location/internal/cache/"
+            - "/services/location/internal/workers/"
+            
+  # Week 3: フロントエンドPOC開発
+  week_3_frontend_poc:
+    day_11_monday:
+      title: "Expo (React Native)初期設定"
+      tasks:
+        - task: "Expoプロジェクト作成"
+          subtasks:
+            - "Expo CLI インストール"
+            - "Expoプロジェクト生成"
+            - "TypeScript設定"
+            - "絶対パス設定"
+            - "EAS Build設定"
+          duration: "2時間"
+          output:
+            - "/packages/mobile/"
+            - "/packages/mobile/package.json"
+            - "/packages/mobile/tsconfig.json"
+            - "/packages/mobile/app.json"
+            - "/packages/mobile/eas.json"
+            
+        - task: "基本ライブラリ導入"
+          subtasks:
+            - "React Navigation設定"
+            - "Redux Toolkit導入"
+            - "React Hook Form導入"
+            - "expo-font/expo-icons設定"
+            - "expo-location設定"
+          duration: "6時間"
+          output:
+            - "/packages/mobile/src/navigation/"
+            - "/packages/mobile/src/store/"
+            - "/packages/mobile/src/components/"
+            - "/packages/mobile/src/hooks/"
+            
+    day_12_tuesday:
+      title: "地図画面実装"
+      tasks:
+        - task: "React Native Maps統合"
+          subtasks:
+            - "react-native-maps導入"
+            - "Mapbox APIキー設定"
+            - "expo-locationパーミッション処理"
+            - "位置情報取得実装"
+            - "カスタムマーカー実装"
+          duration: "4時間"
+          output:
+            - "/packages/mobile/src/screens/MapScreen/"
+            - "/packages/mobile/src/services/location/"
+            - "/apps/mobile/android/app/build.gradle"
+            
+        - task: "マーカー機能実装"
+          subtasks:
+            - "カスタムマーカー作成"
+            - "クラスタリング実装"
+            - "マーカータップ処理"
+            - "情報ウィンドウ表示"
+          duration: "4時間"
+          output:
+            - "/apps/mobile/src/components/MapMarker/"
+            - "/apps/mobile/src/components/InfoWindow/"
+            
+    day_13_wednesday:
+      title: "投稿機能実装"
+      tasks:
+        - task: "投稿作成UI"
+          subtasks:
+            - "投稿フォーム作成"
+            - "画像選択・プレビュー"
+            - "位置情報選択"
+            - "カテゴリ選択"
+          duration: "4時間"
+          output:
+            - "/apps/mobile/src/screens/CreatePost/"
+            - "/apps/mobile/src/components/ImagePicker/"
+            
+        - task: "投稿表示UI"
+          subtasks:
+            - "投稿リスト表示"
+            - "投稿詳細画面"
+            - "コメント機能"
+            - "いいね機能"
+          duration: "4時間"
+          output:
+            - "/apps/mobile/src/screens/PostDetail/"
+            - "/apps/mobile/src/components/PostCard/"
+            
+    day_14_thursday:
+      title: "Next.js Web版開発"
+      tasks:
+        - task: "Next.js プロジェクト作成"
+          subtasks:
+            - "create-next-app実行"
+            - "TypeScript設定"
+            - "Tailwind CSS設定"
+            - "環境変数設定"
+          duration: "2時間"
+          output:
+            - "/apps/web/"
+            - "/apps/web/next.config.js"
+            - "/apps/web/tailwind.config.js"
+            
+        - task: "共通コンポーネント作成"
+          subtasks:
+            - "レイアウトコンポーネント"
+            - "ナビゲーション"
+            - "認証フォーム"
+            - "ローディング表示"
+          duration: "6時間"
+          output:
+            - "/apps/web/src/components/"
+            - "/apps/web/src/layouts/"
+            
+    day_15_friday:
+      title: "Web地図実装"
+      tasks:
+        - task: "Mapbox GL JS統合"
+          subtasks:
+            - "ライブラリ導入"
+            - "地図コンポーネント作成"
+            - "レスポンシブ対応"
+            - "パフォーマンス最適化"
+          duration: "4時間"
+          output:
+            - "/apps/web/src/components/Map/"
+            - "/apps/web/src/hooks/useMap.ts"
+            
+        - task: "リアルタイム機能"
+          subtasks:
+            - "Socket.io Client統合"
+            - "リアルタイム更新実装"
+            - "通知システム"
+            - "プレゼンス機能"
+          duration: "4時間"
+          output:
+            - "/apps/web/src/services/websocket/"
+            - "/apps/web/src/hooks/useRealtime.ts"
+            
+  # Week 4: 統合とデモ準備
+  week_4_integration:
+    day_16_monday:
+      title: "API統合"
+      tasks:
+        - task: "API Client作成"
+          subtasks:
+            - "Axios設定"
+            - "インターセプター実装"
+            - "エラーハンドリング"
+            - "リトライロジック"
+          duration: "4時間"
+          output:
+            - "/packages/api-client/"
+            - "/packages/api-client/src/index.ts"
+            
+        - task: "認証フロー統合"
+          subtasks:
+            - "ログイン処理"
+            - "トークン管理"
+            - "自動更新処理"
+            - "ログアウト処理"
+          duration: "4時間"
+          output:
+            - "/packages/api-client/src/auth/"
+            
+    day_17_tuesday:
+      title: "データフロー実装"
+      tasks:
+        - task: "状態管理統合"
+          subtasks:
+            - "グローバル状態設計"
+            - "API連携"
+            - "キャッシュ戦略"
+            - "楽観的更新実装"
+          duration: "4時間"
+          
+        - task: "エラー処理"
+          subtasks:
+            - "エラーバウンダリ実装"
+            - "リトライUI"
+            - "オフライン対応"
+            - "エラーログ送信"
+          duration: "4時間"
+            
+    day_18_wednesday:
+      title: "E2Eフロー実装"
+      tasks:
+        - task: "ユーザーフロー実装"
+          subtasks:
+            - "新規登録フロー"
+            - "投稿作成フロー"
+            - "検索・フィルタリング"
+            - "通知受信フロー"
+          duration: "8時間"
+            
+    day_19_thursday:
+      title: "テストとバグ修正"
+      tasks:
+        - task: "統合テスト"
+          subtasks:
+            - "E2Eテストシナリオ作成"
+            - "Cypress設定・実行"
+            - "APIテスト実行"
+            - "パフォーマンステスト"
+          duration: "4時間"
+          
+        - task: "バグ修正"
+          subtasks:
+            - "クリティカルバグ修正"
+            - "UIバグ修正"
+            - "データ整合性確認"
+            - "セキュリティ脆弱性対応"
+          duration: "4時間"
+            
+    day_20_friday:
+      title: "デモ準備とドキュメント"
+      tasks:
+        - task: "デモ環境構築"
+          subtasks:
+            - "デモデータ作成"
+            - "デモシナリオ作成"
+            - "プレゼン資料作成"
+            - "動画録画"
+          duration: "4時間"
+          
+        - task: "技術ドキュメント作成"
+          subtasks:
+            - "アーキテクチャ図作成"
+            - "API仕様書作成"
+            - "デプロイ手順書"
+            - "今後の課題リスト"
+          duration: "4時間"
+          output:
+            - "/docs/architecture.md"
+            - "/docs/api-spec.md"
+            - "/docs/deployment.md"
+
+# ====================
+# 2. Phase 1 - MVP開発詳細（3ヶ月）
+# ====================
+phase_1_mvp_detailed:
+  
+  # Sprint 1-2: 認証とユーザー管理（4週間）
+  sprint_1_2:
+    week_1:
+      title: "認証システム完成"
+      monday:
+        tasks:
+          - "OAuth2.0実装（Google, Apple, LINE）"
+          - "メール認証システム"
+          - "SMS認証実装"
+        output:
+          - "/services/auth/src/oauth/"
+          - "/services/auth/src/verification/"
+          
+      tuesday:
+        tasks:
+          - "パスワードリセット機能"
+          - "二要素認証実装"
+          - "セッション管理強化"
+        output:
+          - "/services/auth/src/2fa/"
+          - "/services/auth/src/sessions/"
+          
+      wednesday:
+        tasks:
+          - "権限管理システム（RBAC）"
+          - "APIキー管理"
+          - "レート制限実装"
+        output:
+          - "/services/auth/src/rbac/"
+          - "/services/auth/src/api-keys/"
+          
+      thursday:
+        tasks:
+          - "ログイン履歴管理"
+          - "デバイス管理"
+          - "不正アクセス検知"
+        output:
+          - "/services/auth/src/security/"
+          
+      friday:
+        tasks:
+          - "認証API統合テスト"
+          - "セキュリティテスト"
+          - "ドキュメント更新"
+          
+    week_2:
+      title: "ユーザー管理API"
+      monday:
+        tasks:
+          - "プロフィール管理API詳細実装"
+          - "アバター画像処理"
+          - "プライバシー設定API"
+        output:
+          - "/services/users/src/profile/"
+          
+      tuesday:
+        tasks:
+          - "フォロー/フォロワー機能"
+          - "ブロック機能"
+          - "通報機能"
+        output:
+          - "/services/users/src/social/"
+          
+      wednesday:
+        tasks:
+          - "ユーザー検索API"
+          - "レコメンデーション基礎"
+          - "アクティビティ記録"
+        output:
+          - "/services/users/src/search/"
+          - "/services/users/src/activity/"
+          
+      thursday:
+        tasks:
+          - "通知設定管理"
+          - "言語設定管理"
+          - "テーマ設定管理"
+        output:
+          - "/services/users/src/preferences/"
+          
+      friday:
+        tasks:
+          - "ユーザー管理テスト"
+          - "パフォーマンス最適化"
+          - "APIドキュメント作成"
+          
+    week_3:
+      title: "投稿管理システム"
+      monday:
+        tasks:
+          - "投稿データモデル設計"
+          - "投稿作成API実装"
+          - "メディアアップロード処理"
+        output:
+          - "/services/posts/src/models/"
+          - "/services/posts/src/api/"
+          
+      tuesday:
+        tasks:
+          - "投稿編集・削除API"
+          - "下書き機能"
+          - "予約投稿機能"
+        output:
+          - "/services/posts/src/draft/"
+          - "/services/posts/src/scheduled/"
+          
+      wednesday:
+        tasks:
+          - "タグ・カテゴリ管理"
+          - "位置情報タグ付け"
+          - "メンション機能"
+        output:
+          - "/services/posts/src/tags/"
+          - "/services/posts/src/mentions/"
+          
+      thursday:
+        tasks:
+          - "コメントシステム"
+          - "リアクション機能"
+          - "共有機能"
+        output:
+          - "/services/posts/src/interactions/"
+          
+      friday:
+        tasks:
+          - "投稿検索・フィルタリング"
+          - "トレンド集計"
+          - "投稿分析基礎"
+        output:
+          - "/services/posts/src/analytics/"
+          
+    week_4:
+      title: "位置情報処理強化"
+      monday:
+        tasks:
+          - "ジオフェンシング実装"
+          - "エリア通知システム"
+          - "位置履歴管理"
+        output:
+          - "/services/location/internal/geofencing/"
+          
+      tuesday:
+        tasks:
+          - "ヒートマップ生成"
+          - "混雑度計算"
+          - "移動パターン分析"
+        output:
+          - "/services/location/internal/analytics/"
+          
+      wednesday:
+        tasks:
+          - "プライバシー保護処理"
+          - "位置情報精度調整"
+          - "オフライン対応"
+        output:
+          - "/services/location/internal/privacy/"
+          
+      thursday:
+        tasks:
+          - "位置情報キャッシュ最適化"
+          - "バッチ処理実装"
+          - "データ圧縮"
+        output:
+          - "/services/location/internal/optimization/"
+          
+      friday:
+        tasks:
+          - "位置情報API統合テスト"
+          - "負荷テスト"
+          - "ドキュメント更新"
+          
+  # Sprint 3-4: リアルタイム機能と多言語対応（4週間）
+  sprint_3_4:
+    week_5:
+      title: "リアルタイム通信基盤"
+      monday:
+        tasks:
+          - "WebSocket接続管理"
+          - "ルーム管理システム"
+          - "メッセージキューイング"
+        output:
+          - "/services/realtime/src/connection/"
+          - "/services/realtime/src/rooms/"
+          
+      tuesday:
+        tasks:
+          - "プレゼンス管理"
+          - "オンラインステータス"
+          - "タイピングインジケータ"
+        output:
+          - "/services/realtime/src/presence/"
+          
+      wednesday:
+        tasks:
+          - "リアルタイム同期"
+          - "Conflict Resolution"
+          - "オフライン同期"
+        output:
+          - "/services/realtime/src/sync/"
+          
+      thursday:
+        tasks:
+          - "プッシュ通知統合"
+          - "FCM/APNS設定"
+          - "通知配信最適化"
+        output:
+          - "/services/notifications/"
+          
+      friday:
+        tasks:
+          - "リアルタイム分析"
+          - "メトリクス収集"
+          - "パフォーマンス監視"
+          
+    week_6:
+      title: "多言語対応実装"
+      monday:
+        tasks:
+          - "DeepL API統合"
+          - "翻訳キャッシュ実装"
+          - "言語検出機能"
+        output:
+          - "/services/translation/"
+          
+      tuesday:
+        tasks:
+          - "コンテンツ翻訳API"
+          - "リアルタイム翻訳"
+          - "翻訳品質管理"
+        output:
+          - "/services/translation/src/content/"
+          
+      wednesday:
+        tasks:
+          - "UI多言語化（i18n）"
+          - "言語リソース管理"
+          - "RTL言語対応"
+        output:
+          - "/packages/i18n/"
+          
+      thursday:
+        tasks:
+          - "地域設定管理"
+          - "通貨・単位変換"
+          - "タイムゾーン処理"
+        output:
+          - "/packages/localization/"
+          
+      friday:
+        tasks:
+          - "多言語検索実装"
+          - "言語別コンテンツ管理"
+          - "翻訳テスト"
+          
+    week_7:
+      title: "検索とフィルタリング"
+      monday:
+        tasks:
+          - "Elasticsearch統合"
+          - "インデックス設計"
+          - "検索クエリ最適化"
+        output:
+          - "/services/search/"
+          
+      tuesday:
+        tasks:
+          - "全文検索実装"
+          - "ファセット検索"
+          - "オートコンプリート"
+        output:
+          - "/services/search/src/fulltext/"
+          
+      wednesday:
+        tasks:
+          - "地理空間検索"
+          - "時間軸検索"
+          - "複合フィルタリング"
+        output:
+          - "/services/search/src/geo/"
+          
+      thursday:
+        tasks:
+          - "検索履歴管理"
+          - "保存検索機能"
+          - "検索アラート"
+        output:
+          - "/services/search/src/history/"
+          
+      friday:
+        tasks:
+          - "検索パフォーマンス最適化"
+          - "検索分析"
+          - "A/Bテスト基盤"
+          
+    week_8:
+      title: "通知システム構築"
+      monday:
+        tasks:
+          - "通知エンジン実装"
+          - "通知ルール管理"
+          - "優先度管理"
+        output:
+          - "/services/notifications/src/engine/"
+          
+      tuesday:
+        tasks:
+          - "メール通知"
+          - "SMS通知"
+          - "アプリ内通知"
+        output:
+          - "/services/notifications/src/channels/"
+          
+      wednesday:
+        tasks:
+          - "通知テンプレート管理"
+          - "パーソナライゼーション"
+          - "配信スケジューリング"
+        output:
+          - "/services/notifications/src/templates/"
+          
+      thursday:
+        tasks:
+          - "通知設定UI"
+          - "通知センター"
+          - "既読管理"
+        output:
+          - "/apps/mobile/src/screens/Notifications/"
+          
+      friday:
+        tasks:
+          - "通知分析"
+          - "配信最適化"
+          - "A/Bテスト"
+          
+  # Sprint 5-6: ゲーミフィケーションと分析（4週間）
+  sprint_5_6:
+    week_9:
+      title: "クエストシステム基本実装"
+      monday:
+        tasks:
+          - "クエストデータモデル"
+          - "クエスト管理API"
+          - "進捗トラッキング"
+        output:
+          - "/services/gamification/src/quests/"
+          
+      tuesday:
+        tasks:
+          - "報酬システム"
+          - "ポイント管理"
+          - "バッジシステム"
+        output:
+          - "/services/gamification/src/rewards/"
+          
+      wednesday:
+        tasks:
+          - "ランキングシステム"
+          - "リーダーボード"
+          - "シーズン管理"
+        output:
+          - "/services/gamification/src/rankings/"
+          
+      thursday:
+        tasks:
+          - "実績システム"
+          - "マイルストーン"
+          - "進捗可視化"
+        output:
+          - "/services/gamification/src/achievements/"
+          
+      friday:
+        tasks:
+          - "ゲーミフィケーションUI"
+          - "アニメーション実装"
+          - "サウンドエフェクト"
+          
+    week_10:
+      title: "分析ダッシュボード基礎"
+      monday:
+        tasks:
+          - "データパイプライン構築"
+          - "ETL処理実装"
+          - "データウェアハウス設計"
+        output:
+          - "/services/analytics/src/pipeline/"
+          
+      tuesday:
+        tasks:
+          - "メトリクス定義"
+          - "KPI計算ロジック"
+          - "集計バッチ処理"
+        output:
+          - "/services/analytics/src/metrics/"
+          
+      wednesday:
+        tasks:
+          - "ダッシュボードAPI"
+          - "リアルタイムメトリクス"
+          - "データエクスポート"
+        output:
+          - "/services/analytics/src/api/"
+          
+      thursday:
+        tasks:
+          - "ダッシュボードUI基礎"
+          - "グラフコンポーネント"
+          - "レポート生成"
+        output:
+          - "/apps/dashboard/"
+          
+      friday:
+        tasks:
+          - "分析テスト"
+          - "データ検証"
+          - "パフォーマンス最適化"
+          
+    week_11:
+      title: "パフォーマンス最適化"
+      monday:
+        tasks:
+          - "フロントエンド最適化"
+          - "コード分割"
+          - "遅延ローディング"
+          
+      tuesday:
+        tasks:
+          - "API最適化"
+          - "クエリ最適化"
+          - "キャッシュ戦略改善"
+          
+      wednesday:
+        tasks:
+          - "データベース最適化"
+          - "インデックス調整"
+          - "クエリプラン分析"
+          
+      thursday:
+        tasks:
+          - "CDN設定"
+          - "画像最適化"
+          - "静的ファイル配信"
+          
+      friday:
+        tasks:
+          - "負荷テスト実施"
+          - "ボトルネック特定"
+          - "スケーリング計画"
+          
+    week_12:
+      title: "MVP完成とテスト"
+      monday:
+        tasks:
+          - "機能統合テスト"
+          - "E2Eテスト完備"
+          - "回帰テスト"
+          
+      tuesday:
+        tasks:
+          - "セキュリティテスト"
+          - "ペネトレーションテスト"
+          - "脆弱性スキャン"
+          
+      wednesday:
+        tasks:
+          - "ユーザビリティテスト"
+          - "アクセシビリティテスト"
+          - "多言語テスト"
+          
+      thursday:
+        tasks:
+          - "バグ修正"
+          - "最終調整"
+          - "リリースノート作成"
+          
+      friday:
+        tasks:
+          - "MVP版デプロイ"
+          - "モニタリング設定"
+          - "運用手順書作成"
+
+# ====================
+# 3. プロジェクト構造
+# ====================
+project_structure:
+  root:
+    - "/.github/"
+    - "/.husky/"
+    - "/apps/"
+    - "/services/"
+    - "/packages/"
+    - "/infrastructure/"
+    - "/docs/"
+    - "/scripts/"
+    - "/tests/"
+    
+  apps:
+    mobile:
+      - "/src/screens/"
+      - "/src/components/"
+      - "/src/navigation/"
+      - "/src/store/"
+      - "/src/services/"
+      - "/src/hooks/"
+      - "/src/utils/"
+      - "/src/assets/"
+      - "/src/locales/"
+      
+    web:
+      - "/src/pages/"
+      - "/src/components/"
+      - "/src/layouts/"
+      - "/src/lib/"
+      - "/src/hooks/"
+      - "/src/styles/"
+      - "/public/"
+      
+    dashboard:
+      - "/src/features/"
+      - "/src/widgets/"
+      - "/src/charts/"
+      - "/src/reports/"
+      
+  services:
+    auth:
+      - "/src/auth/"
+      - "/src/users/"
+      - "/src/sessions/"
+      - "/src/oauth/"
+      - "/src/2fa/"
+      
+    posts:
+      - "/src/posts/"
+      - "/src/comments/"
+      - "/src/reactions/"
+      - "/src/media/"
+      
+    location:
+      - "/internal/handlers/"
+      - "/internal/services/"
+      - "/internal/repository/"
+      - "/internal/models/"
+      
+    realtime:
+      - "/src/websocket/"
+      - "/src/rooms/"
+      - "/src/presence/"
+      - "/src/sync/"
+      
+    notifications:
+      - "/src/engine/"
+      - "/src/channels/"
+      - "/src/templates/"
+      - "/src/queue/"
+      
+    analytics:
+      - "/src/pipeline/"
+      - "/src/metrics/"
+      - "/src/reports/"
+      - "/src/export/"
+      
+    translation:
+      - "/src/deepl/"
+      - "/src/cache/"
+      - "/src/detection/"
+      
+    gamification:
+      - "/src/quests/"
+      - "/src/rewards/"
+      - "/src/rankings/"
+      - "/src/achievements/"
+      
+    search:
+      - "/src/elasticsearch/"
+      - "/src/indexing/"
+      - "/src/query/"
+      - "/src/suggest/"
+      
+  packages:
+    - "/api-client/"
+    - "/shared-types/"
+    - "/ui-components/"
+    - "/utils/"
+    - "/i18n/"
+    - "/config/"
+    - "/logger/"
+    - "/errors/"
+    
+  infrastructure:
+    terraform:
+      - "/aws/"
+      - "/modules/"
+      - "/environments/"
+      
+    kubernetes:
+      - "/manifests/"
+      - "/helm-charts/"
+      - "/operators/"
+      
+    docker:
+      - "/base-images/"
+      - "/services/"
+      - "/scripts/"
+
+# ====================
+# 4. 技術実装詳細
+# ====================
+technical_implementation:
+  
+  authentication:
+    jwt_implementation:
+      access_token:
+        algorithm: "RS256"
+        expiry: "15 minutes"
+        claims:
+          - "user_id"
+          - "email"
+          - "roles"
+          - "permissions"
+      refresh_token:
+        storage: "Redis"
+        expiry: "30 days"
+        rotation: "enabled"
+      security:
+        - "HTTPS only"
+        - "Secure cookie"
+        - "CSRF protection"
+        - "Rate limiting"
+        
+  database_design:
+    postgresql:
+      schemas:
+        - name: "users"
+          tables:
+            - "users"
+            - "profiles"
+            - "preferences"
+            - "devices"
+        - name: "posts"
+          tables:
+            - "posts"
+            - "comments"
+            - "reactions"
+            - "media"
+        - name: "gamification"
+          tables:
+            - "quests"
+            - "user_quests"
+            - "rewards"
+            - "rankings"
+            
+    mongodb:
+      collections:
+        - name: "locations"
+          indexes:
+            - "2dsphere on coordinates"
+            - "compound on user_id, timestamp"
+        - name: "realtime_data"
+          ttl: "24 hours"
+        - name: "notifications"
+          sharding_key: "user_id"
+          
+    redis:
+      usage:
+        - "Session storage"
+        - "Cache layer"
+        - "Rate limiting"
+        - "Real-time presence"
+        - "Message queue"
+        
+  api_design:
+    rest_api:
+      versioning: "URL path (/api/v1)"
+      authentication: "Bearer token"
+      pagination: "Cursor-based"
+      rate_limiting:
+        anonymous: "100 req/hour"
+        authenticated: "1000 req/hour"
+        premium: "10000 req/hour"
+      response_format:
+        success:
+          - "status: 200"
+          - "data: {}"
+          - "meta: {}"
+        error:
+          - "status: 4xx/5xx"
+          - "error: {code, message, details}"
+          
+    graphql_api:
+      schema_first: true
+      subscriptions: "WebSocket"
+      dataloader: "N+1 query prevention"
+      depth_limiting: 5
+      query_complexity: "calculated"
+      
+  frontend_architecture:
+    state_management:
+      mobile:
+        library: "Redux Toolkit"
+        middleware:
+          - "redux-persist"
+          - "redux-logger"
+          - "redux-thunk"
+        structure:
+          - "features/"
+          - "slices/"
+          - "selectors/"
+          
+      web:
+        library: "Zustand"
+        persistence: "localStorage"
+        devtools: "enabled"
+        
+    performance:
+      code_splitting: "route-based"
+      lazy_loading: "components"
+      image_optimization:
+        - "WebP format"
+        - "Responsive images"
+        - "Lazy loading"
+      caching:
+        - "Service Worker"
+        - "HTTP cache headers"
+        - "CDN integration"
+        
+  monitoring:
+    application:
+      - tool: "Datadog APM"
+        metrics:
+          - "Response time"
+          - "Error rate"
+          - "Throughput"
+      - tool: "Sentry"
+        usage:
+          - "Error tracking"
+          - "Performance monitoring"
+          
+    infrastructure:
+      - tool: "Prometheus + Grafana"
+        metrics:
+          - "CPU usage"
+          - "Memory usage"
+          - "Network I/O"
+          - "Disk I/O"
+      - tool: "ELK Stack"
+        usage:
+          - "Log aggregation"
+          - "Log analysis"
+          - "Search"
+          
+    business:
+      - tool: "Mixpanel"
+        events:
+          - "User signup"
+          - "Post created"
+          - "Quest completed"
+      - tool: "Google Analytics"
+        tracking:
+          - "Page views"
+          - "User flow"
+          - "Conversion"
+
+# ====================
+# 5. デプロイメント戦略
+# ====================
+deployment_strategy:
+  
+  environments:
+    development:
+      url: "dev.shibuya-live-canvas.jp"
+      auto_deploy: "main branch"
+      resources: "minimal"
+      
+    staging:
+      url: "staging.shibuya-live-canvas.jp"
+      auto_deploy: "release/* branches"
+      resources: "production-like"
+      
+    production:
+      url: "shibuya-live-canvas.jp"
+      deploy: "manual approval"
+      resources: "auto-scaling"
+      
+  ci_cd_pipeline:
+    github_actions:
+      on_pull_request:
+        - "Lint check"
+        - "Type check"
+        - "Unit tests"
+        - "Build verification"
+        
+      on_merge_to_main:
+        - "Full test suite"
+        - "Security scan"
+        - "Docker build"
+        - "Deploy to dev"
+        
+      on_release:
+        - "Integration tests"
+        - "Performance tests"
+        - "Deploy to staging"
+        - "Smoke tests"
+        - "Deploy to production"
+        
+  rollout_strategy:
+    type: "Blue-Green"
+    canary_deployment:
+      initial: "5%"
+      steps: [10, 25, 50, 100]
+      duration: "30 minutes per step"
+      rollback_on_error: true
+      
+  backup_strategy:
+    databases:
+      frequency: "Daily"
+      retention: "30 days"
+      type: "Incremental"
+      
+    media_files:
+      storage: "S3 versioning"
+      lifecycle: "90 days to Glacier"
+      
+    disaster_recovery:
+      rpo: "1 hour"
+      rto: "2 hours"
+      multi_region: true

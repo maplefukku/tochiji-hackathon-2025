@@ -1,0 +1,67 @@
+{
+  "name": "shibuya-live-canvas",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Next-generation location-based social platform for Shibuya",
+  "workspaces": [
+    "packages/web",
+    "packages/mobile",
+    "packages/api-gateway",
+    "packages/services/*",
+    "packages/shared/*"
+  ],
+  "scripts": {
+    "dev": "lerna run dev --parallel",
+    "build": "lerna run build",
+    "test": "lerna run test",
+    "lint": "lerna run lint",
+    "typecheck": "lerna run typecheck",
+    "clean": "lerna clean && rm -rf node_modules",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.34.0",
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/shibuya-live-canvas.git"
+  },
+  "keywords": [
+    "shibuya",
+    "location-based",
+    "social",
+    "real-time",
+    "map"
+  ],
+  "author": "Shibuya Live Canvas Team",
+  "license": "PROPRIETARY"
+}

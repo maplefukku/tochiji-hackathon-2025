@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native'
 import { Card } from '../components/Card'
+import { FloatingActionButton } from '../components/FloatingActionButton'
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../constants/theme'
 
 // MapViewのプレースホルダー（実際のマップはreact-native-mapsを使用）
@@ -47,6 +48,30 @@ export const MapScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('1')
   const [showNearbyPosts, setShowNearbyPosts] = useState(true)
 
+  const fabActions = [
+    {
+      id: '1',
+      icon: '📸',
+      label: '写真を投稿',
+      onPress: () => console.warn('写真投稿'),
+      color: Colors.status.success,
+    },
+    {
+      id: '2',
+      icon: '✍️',
+      label: 'テキスト投稿',
+      onPress: () => console.warn('テキスト投稿'),
+      color: Colors.status.info,
+    },
+    {
+      id: '3',
+      icon: '🎯',
+      label: 'クエスト作成',
+      onPress: () => console.warn('クエスト作成'),
+      color: Colors.status.warning,
+    },
+  ]
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mapContainer}>
@@ -87,9 +112,7 @@ export const MapScreen: React.FC = () => {
         </TouchableOpacity>
 
         {/* フローティングアクションボタン */}
-        <TouchableOpacity style={styles.fab}>
-          <Text style={styles.fabIcon}>➕</Text>
-        </TouchableOpacity>
+        <FloatingActionButton actions={fabActions} />
       </View>
 
       {/* 近くの投稿パネル */}
@@ -203,22 +226,6 @@ const styles = StyleSheet.create({
   },
   locationButtonIcon: {
     fontSize: 24,
-  },
-  fab: {
-    position: 'absolute',
-    right: Spacing.md,
-    bottom: 220,
-    width: 56,
-    height: 56,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary.main,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.xl,
-  },
-  fabIcon: {
-    fontSize: 24,
-    color: Colors.primary.contrast,
   },
   bottomPanel: {
     position: 'absolute',

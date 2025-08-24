@@ -1,14 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import React, { useEffect, useRef } from 'react'
+import { View, Text, StyleSheet, Animated } from 'react-native'
+import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme'
 
 interface ProgressBarProps {
-  progress: number; // 0-100
-  label?: string;
-  showPercentage?: boolean;
-  color?: string;
-  animated?: boolean;
-  height?: number;
+  progress: number // 0-100
+  label?: string
+  showPercentage?: boolean
+  color?: string
+  animated?: boolean
+  height?: number
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -19,7 +19,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   animated = true,
   height = 8,
 }) => {
-  const animatedWidth = useRef(new Animated.Value(0)).current;
+  const animatedWidth = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     if (animated) {
@@ -27,28 +27,27 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         toValue: progress,
         duration: 500,
         useNativeDriver: false,
-      }).start();
+      }).start()
     } else {
-      animatedWidth.setValue(progress);
+      animatedWidth.setValue(progress)
     }
-  }, [progress, animated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress, animated])
 
   const widthPercentage = animatedWidth.interpolate({
     inputRange: [0, 100],
     outputRange: ['0%', '100%'],
-  });
+  })
 
   return (
     <View style={styles.container}>
       {(label || showPercentage) && (
         <View style={styles.header}>
           {label && <Text style={styles.label}>{label}</Text>}
-          {showPercentage && (
-            <Text style={styles.percentage}>{Math.round(progress)}%</Text>
-          )}
+          {showPercentage && <Text style={styles.percentage}>{Math.round(progress)}%</Text>}
         </View>
       )}
-      
+
       <View style={[styles.track, { height }]}>
         <Animated.View
           style={[
@@ -62,8 +61,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         />
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -93,4 +92,4 @@ const styles = StyleSheet.create({
   fill: {
     borderRadius: BorderRadius.full,
   },
-});
+})

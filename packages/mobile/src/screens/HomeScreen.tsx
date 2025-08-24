@@ -1,8 +1,9 @@
 import React from 'react'
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList } from 'react-native'
 import { PostCard } from '../components/PostCard'
-import { Card } from '../components/Card'
-import { Button } from '../components/Button'
+import { AnimatedButton } from '../components/AnimatedButton'
+import { GlassCard } from '../components/GlassCard'
+import { AnimatedCard } from '../components/AnimatedCard'
 import { Colors, Spacing, Typography } from '../constants/theme'
 
 const mockPosts = [
@@ -51,26 +52,37 @@ export const HomeScreen: React.FC = () => {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.heroSection}>
-        <Text style={styles.heroTitle}>渋谷の「今」を共有しよう</Text>
-        <Text style={styles.heroSubtitle}>リアルタイムで渋谷の情報をシェア</Text>
-        <Button
-          title="投稿を作成"
-          variant="primary"
-          size="large"
-          fullWidth
-          style={styles.createButton}
-        />
+        <GlassCard intensity="light" style={styles.heroGlass}>
+          <Text style={styles.heroTitle}>渋谷の「今」を共有しよう</Text>
+          <Text style={styles.heroSubtitle}>リアルタイムで渋谷の情報をシェア</Text>
+          <AnimatedButton
+            title="投稿を作成"
+            variant="secondary"
+            size="large"
+            fullWidth
+            icon="✨"
+            animationType="pulse"
+            style={styles.createButton}
+          />
+        </GlassCard>
       </View>
 
-      <Card variant="filled" style={styles.trendingCard}>
+      <AnimatedCard variant="slide" delay={200} style={styles.trendingCard}>
         <Text style={styles.sectionTitle}>トレンド 🔥</Text>
-        {trendingTopics.map((topic) => (
-          <TouchableOpacity key={topic.id} style={styles.trendingItem}>
-            <Text style={styles.trendingTitle}>{topic.title}</Text>
-            <Text style={styles.trendingCount}>{topic.count}</Text>
-          </TouchableOpacity>
+        {trendingTopics.map((topic, index) => (
+          <AnimatedCard
+            key={topic.id}
+            variant="fade"
+            delay={300 + index * 100}
+            style={styles.trendingItemCard}
+          >
+            <TouchableOpacity style={styles.trendingItem}>
+              <Text style={styles.trendingTitle}>{topic.title}</Text>
+              <Text style={styles.trendingCount}>{topic.count}</Text>
+            </TouchableOpacity>
+          </AnimatedCard>
         ))}
-      </Card>
+      </AnimatedCard>
 
       <Text style={styles.sectionTitle}>最新の投稿</Text>
     </View>
@@ -114,6 +126,9 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     paddingTop: Spacing.xxl,
   },
+  heroGlass: {
+    backgroundColor: 'transparent',
+  },
   heroTitle: {
     ...Typography.largeTitle,
     color: Colors.primary.contrast,
@@ -126,12 +141,19 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   createButton: {
-    backgroundColor: Colors.background.primary,
     marginTop: Spacing.md,
   },
   trendingCard: {
     margin: Spacing.md,
     marginTop: -Spacing.lg,
+    backgroundColor: Colors.background.primary,
+  },
+  trendingItemCard: {
+    backgroundColor: 'transparent',
+    padding: 0,
+    marginVertical: 0,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   sectionTitle: {
     ...Typography.title2,
